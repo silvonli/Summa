@@ -1,0 +1,175 @@
+/* 重置和基础样式 */
+:host {
+  all: initial;
+  display: block;
+}
+
+/* 确保自定义属性在 Shadow DOM 中可用 */
+:host {
+  /* Colors */
+  --summa-primary: #95c043;
+  --summa-primary-light: #e5fac3;
+  --summa-primary-alpha: rgba(149, 192, 67, 0.3);
+  --summa-text-primary: #2d2d2d;
+  --summa-text-secondary: #6b7280;
+  --summa-text-pending: #9ca585;
+  --summa-danger: #ef4444;
+  --summa-white: #ffffff;
+  --summa-border: #e5e7eb;
+
+  /* Shadows */
+  --summa-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+
+  /* Spacing */
+  --spacing-xs: 6px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 50%;
+}
+
+/* 确保所有文本元素继承字体 */
+:host * {
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 400px;
+  background-color: rgba(var(--summa-white), 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--summa-shadow);
+  font-family: Arial, sans-serif;
+  z-index: 999999;
+  border: 1px solid var(--summa-border);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--summa-border);
+}
+
+.title {
+  background-color: var(--summa-primary-light);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-weight: bold;
+  color: var(--summa-text-primary);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.content {
+  padding: var(--spacing-lg);
+}
+
+.progress {
+  display: flex;
+  gap: var(--spacing-md);
+  border: 1px solid var(--summa-primary-alpha);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  background-color: rgba(var(--summa-white), 0.5);
+}
+
+.icon-large {
+  font-size: 32px;
+  background-color: var(--summa-primary-light);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--summa-primary);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.step.pending {
+  color: var(--summa-text-pending);
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--summa-border);
+  color: var(--summa-text-secondary);
+}
+
+.actions-bottom {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-top: auto;
+}
+
+.action-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--summa-border);
+  background: var(--summa-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 14px;
+}
+
+.action-button.delete {
+  color: var(--summa-danger);
+  border-color: var(--summa-danger);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
