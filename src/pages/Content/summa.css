@@ -41,7 +41,7 @@
   padding: 0;
 }
 
-.card {
+.app {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -63,31 +63,19 @@
   border-bottom: 1px solid var(--summa-border);
 }
 
-.title {
-  background-color: var(--summa-primary-light);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-sm);
-  font-weight: bold;
-  color: var(--summa-text-primary);
-}
-
-.actions {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.icon-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
 
 .content {
-  padding: var(--spacing-lg);
-  height: calc(100% - 60px - 60px);
+  padding: var(--spacing-md);
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.markdown-body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0;
 }
 
 .progress {
@@ -97,14 +85,6 @@
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   background-color: var(--summa-white);
-}
-
-.markdown-body {
-  box-sizing: border-box;
-  min-width: 200px;
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 0;
 }
 
 .steps {
@@ -124,34 +104,6 @@
 
 .step.pending {
   color: var(--summa-text-pending);
-}
-
-.footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--summa-border);
-  color: var(--summa-text-secondary);
-  margin-top: auto;
-}
-
-
-.action-button {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--summa-border);
-  background: var(--summa-white);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  font-size: 14px;
-}
-
-.action-button.delete {
-  color: var(--summa-danger);
-  border-color: var(--summa-danger);
 }
 
 @keyframes spin {

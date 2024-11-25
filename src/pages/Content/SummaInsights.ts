@@ -23,14 +23,18 @@ That's it.  Pretty simple.  There's also a drop-down option above to switch betw
 `;
 
 class SummaInsights {
-  private container: HTMLDivElement | null;
+  private hostNode: HTMLDivElement | null;
   private shadowRoot: ShadowRoot | null;
   private isShow: boolean;
+  private content: string;
+  private summary: string;
 
   constructor() {
-    this.container = null;
+    this.hostNode = null;
     this.shadowRoot = null;
     this.isShow = false;
+    this.content = '';
+    this.summary = '';
   }
 
   init(): void {
@@ -50,64 +54,47 @@ class SummaInsights {
   }
 
   private toggle(): void {
+    if (!this.hostNode) {
+      this.inject();
+      // 提取内容
+      this.extractContent();
+      // 总结内容
+      this.summarizeContent();
+      // todo:等待 3 秒模拟分析
+      setTimeout(() => {
+        this.wrapUp();
+      }, 3000);
+    }
+
     this.isShow = !this.isShow;
     if (this.isShow) {
-      this.showSumma();
+      this.setVisibility(true);
     } else {
-      this.hideSumma();
+      this.setVisibility(false);
     }
   }
 
-  private setCardVisibility(visible: boolean): void {
-    if (this.shadowRoot) {
-      const card = this.shadowRoot.querySelector('.card');
-      if (card) {
-        if (visible) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
-      }
-    }
+  private setVisibility(visible: boolean): void {
+    this.shadowRoot?.querySelector('.app')?.classList.toggle('hidden', !visible);
   }
 
-  private hideSumma(): void {
-    this.setCardVisibility(false);
-  }
-
-  private showSumma(): void {
-    if (!this.container) {
-      this.inject();
-    }
-
-    this.setCardVisibility(true);
-
-    // 提取内容
-    this.extractContent();
-    // 分析内容
-    this.analyzeContent();
-    // 等待 3 秒模拟分析
-    setTimeout(() => {
-      this.wrapUp();
-    }, 3000);
-  }
 
   private extractContent(): void {
-
+    this.content = extract;
   }
 
-  private analyzeContent(): void {
-
+  private summarizeContent(): void {
+    const summary = this.content;
+    this.summary = summary;
   }
 
   private wrapUp(): void {
-
     marked.use({
       async: false,
       pedantic: false,
       gfm: true,
     });
-    const html = marked.parse(extract) as string;
+    const html = marked.parse(this.summary) as string;
     const progress = this.shadowRoot?.querySelector('.progress');
     const markdownBody = this.shadowRoot?.querySelector('.markdown-body');
 
@@ -124,10 +111,10 @@ class SummaInsights {
   private inject(): void {
     try {
       // 创建容器
-      this.container = document.createElement('div');
+      this.hostNode = document.createElement('div');
 
       // 创建 Shadow DOM
-      this.shadowRoot = this.container.attachShadow({ mode: 'open' });
+      this.shadowRoot = this.hostNode.attachShadow({ mode: 'open' });
 
       // 拼接样式
       const style = `
@@ -144,7 +131,7 @@ class SummaInsights {
 
       // 添加到页面
       summaDebugLog('开始添加到页面');
-      document.body.appendChild(this.container);
+      document.body.appendChild(this.hostNode);
 
       // 绑定事件处理
       this.bindEvents();
@@ -155,23 +142,51 @@ class SummaInsights {
   }
 
   private remove(): void {
-    if (this.container) {
-      this.container.remove();
-      this.container = null;
+    if (this.hostNode) {
+      this.hostNode.remove();
+      this.hostNode = null;
       this.shadowRoot = null;
+      this.content = '';
+      this.summary = '';
     }
   }
 
   private bindEvents(): void {
     if (!this.shadowRoot) return;
 
-    // 删除按钮事件
-    const deleteButton = this.shadowRoot.querySelector('.delete');
-    if (deleteButton) {
-      deleteButton.addEventListener('click', () => this.remove());
-    }
 
-    // 其他按钮事件...
+  }
+
+  private copyMarkdown(): void {
+    if (!this.shadowRoot) return;
+
+    const markdownBody = this.shadowRoot.querySelector('.markdown-body');
+    if (!markdownBody) return;
+
+    // 获取总结的 markdown 文本
+    const markdownText = this.summary;
+
+    // 复制到剪贴板
+    navigator.clipboard.writeText(markdownText)
+      .then(() => {
+        const copyButton = this.shadowRoot?.querySelector('.copy-button');
+        if (copyButton) {
+          // 临时改变按钮文字显示复制成功
+          const originalText = copyButton.textContent;
+          copyButton.textContent = '✅ 已复制';
+          setTimeout(() => {
+            copyButton.textContent = originalText;
+          }, 2000);
+        }
+      })
+      .catch(err => {
+        console.error('复制失败:', err);
+      });
+  }
+
+  private refresh(): void {
+    this.summarizeContent();
+    this.wrapUp();
   }
 }
 
