@@ -13,6 +13,8 @@
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
+    "github-markdown-css": "^5.8.0",
+    "marked": "^15.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
