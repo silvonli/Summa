@@ -2,7 +2,7 @@ import { summaDebugLog } from '../../lib/utils';
 import summaTemplate from './summa.html';
 import { marked } from 'marked';
 
-const extract = `
+const extract_mock = `
 Marked - Markdown Parser
 ========================
 
@@ -21,6 +21,13 @@ That's it.  Pretty simple.  There's also a drop-down option above to switch betw
 - **Lexer Data:**  What [marked] uses internally, in case you like gory stuff like this.
 - **Quick Reference:**  A brief run-down of how to format things using markdown.
 `;
+
+// 进度状态 
+enum ProcessStatus {
+  EXTRACTING = 'extracting',
+  SUMMARIZING = 'summarizing',
+  PARSING = 'parsing',
+}
 
 class SummaInsights {
   private hostNode: HTMLDivElement | null;
@@ -53,25 +60,78 @@ class SummaInsights {
     }
   }
 
-  private toggle(): void {
+  // 更新进度显示
+  private updateProcess(newStatus: ProcessStatus): void {
+    if (!this.shadowRoot) return;
+
+    const progress = this.shadowRoot.querySelector('.progress');
+
+    if (!progress) return;
+
+    // 定义各状态对应的步骤显示
+    const steps = [
+      { status: ProcessStatus.EXTRACTING, text: '正在提取内容...', icon: '🔄' },
+      { status: ProcessStatus.SUMMARIZING, text: '正在总结内容...', icon: '🔄' },
+      { status: ProcessStatus.PARSING, text: '正在解析...', icon: '🔄' },
+    ];
+
+    // 根据当前状态更新UI
+    const currentStep = steps.find(step => step.status === newStatus);
+    if (!currentStep) return;
+
+    // 更新进度条内容
+    progress.innerHTML = `
+      <div class="steps">
+        ${steps.map(step => `
+          <div class="step">
+            <span class="${step.status === newStatus ? 'loading' : 'check'}">${step.icon}</span>
+            ${step.text}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // 更新总结显示
+  private updateSummary(html: string): void {
+    if (!this.shadowRoot) return;
+
+    const markdownBody = this.shadowRoot?.querySelector('.markdown-body');
+
+    if (!markdownBody) return;
+    markdownBody.innerHTML = html;
+  }
+
+  // 修改 toggle 方法
+  private async toggle(): Promise<void> {
     if (!this.hostNode) {
+      // 初次打开，先注入
       this.inject();
+
+      // 切换到显示进度
+      this.switchProgressAndContentVisibility(true);
+
       // 提取内容
-      this.extractContent();
+      this.updateProcess(ProcessStatus.EXTRACTING);
+      await this.extractContent();
+
       // 总结内容
-      this.summarizeContent();
-      // todo:等待 3 秒模拟分析
-      setTimeout(() => {
-        this.wrapUp();
-      }, 3000);
+      this.updateProcess(ProcessStatus.SUMMARIZING);
+      await this.summarizeContent();
+
+      // 解析总结
+      this.updateProcess(ProcessStatus.PARSING);
+      const html = await this.parseSummary();
+
+      // 切换到显示内容
+      this.switchProgressAndContentVisibility(false);
+      // 显示总结
+      this.updateSummary(html);
+
     }
 
     this.isShow = !this.isShow;
-    if (this.isShow) {
-      this.setVisibility(true);
-    } else {
-      this.setVisibility(false);
-    }
+    this.setVisibility(this.isShow);
   }
 
   private setVisibility(visible: boolean): void {
@@ -79,33 +139,25 @@ class SummaInsights {
   }
 
 
-  private extractContent(): void {
-    this.content = extract;
+  private async extractContent(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    this.content = extract_mock;
   }
 
-  private summarizeContent(): void {
+  private async summarizeContent(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const summary = this.content;
     this.summary = summary;
   }
 
-  private wrapUp(): void {
+  private async parseSummary(): Promise<string> {
     marked.use({
       async: false,
       pedantic: false,
       gfm: true,
     });
     const html = marked.parse(this.summary) as string;
-    const progress = this.shadowRoot?.querySelector('.progress');
-    const markdownBody = this.shadowRoot?.querySelector('.markdown-body');
-
-    if (markdownBody) {
-      markdownBody.innerHTML = html;
-    }
-
-    if (progress) {
-      progress.classList.add('hidden');
-    }
-
+    return html;
   }
 
   private inject(): void {
@@ -141,6 +193,7 @@ class SummaInsights {
     }
   }
 
+  // 修改 remove 方法
   private remove(): void {
     if (this.hostNode) {
       this.hostNode.remove();
@@ -184,9 +237,32 @@ class SummaInsights {
       });
   }
 
-  private refresh(): void {
-    this.summarizeContent();
-    this.wrapUp();
+  // 切换进度条和内容区域的显示状态
+  private switchProgressAndContentVisibility(showProgress: boolean): void {
+    if (!this.shadowRoot) return;
+
+    this.shadowRoot.querySelector('.progress')?.classList.toggle('hidden', !showProgress);
+    this.shadowRoot.querySelector('.markdown-body')?.classList.toggle('hidden', showProgress);
+  }
+
+  // refresh 方法
+  private async refresh(): Promise<void> {
+    // 切换到显示进度
+    this.switchProgressAndContentVisibility(true);
+
+    // 重新总结内容 
+    this.updateProcess(ProcessStatus.SUMMARIZING);
+    await this.summarizeContent();
+
+    // 解析总结
+    this.updateProcess(ProcessStatus.PARSING);
+    const html = await this.parseSummary();
+
+    // 切换到显示内容
+    this.switchProgressAndContentVisibility(false);
+    // 显示总结
+    this.updateSummary(html);
+
   }
 }
 
