@@ -55,8 +55,8 @@ class SummaInsights {
     sendResponse: (response?: any) => void
   ): void {
     summaDebugLog('收到消息', request);
-    if (request.action === 'toggleSumma') {
-      this.toggle();
+    if (request.action === 'clickedSumma') {
+      this.onClickedSumma();
     }
   }
 
@@ -125,38 +125,60 @@ class SummaInsights {
     markdownBody.innerHTML = html;
   }
 
-  // 修改 toggle 方法
-  private async toggle(): Promise<void> {
-    if (!this.hostNode) {
-      // 初次打开，先注入
-      this.inject();
-
-      // 切换到显示进度
-      this.switchProgressAndContentVisibility(true);
-
-      // 提取内容
-      this.updateProcess(ProcessStatus.EXTRACTING);
-      await this.extractContent();
-
-      // 总结内容
-      this.updateProcess(ProcessStatus.SUMMARIZING);
-      await this.summarizeContent();
-
-      // 解析总结
-      this.updateProcess(ProcessStatus.PARSING);
-      const html = await this.parseSummary();
-
-      // 切换到显示内容
-      this.switchProgressAndContentVisibility(false);
-      // 显示总结
-      this.updateSummary(html);
-
-    }
-
-    this.isShow = !this.isShow;
-    this.shadowRoot?.querySelector('.app')?.classList.toggle('hidden', !this.isShow);
+  // onRefresh 方法
+  private async onRefresh(): Promise<void> {
+    await this.processContent(false);
   }
 
+  // clickedSumma 方法
+  private async onClickedSumma(): Promise<void> {
+    // 如果已经显示，直接隐藏
+    if (this.isShow) {
+      this.hide();
+      return;
+    }
+
+    // 如果未初始化，进行初始化
+    if (!this.hostNode) {
+      this.inject();
+      await this.processContent(true);
+    }
+
+    // 显示内容
+    this.show();
+  }
+
+  private hide(): void {
+    this.isShow = false;
+    this.shadowRoot?.querySelector('.app')?.classList.add('hidden');
+  }
+
+  private show(): void {
+    this.isShow = true;
+    this.shadowRoot?.querySelector('.app')?.classList.remove('hidden');
+  }
+
+  private async processContent(shouldExtract = false): Promise<void> {
+    // 显示进度条
+    this.switchProgressAndContentVisibility(true);
+
+    if (shouldExtract) {
+      this.updateProcess(ProcessStatus.EXTRACTING);
+      await this.extractContent();
+    }
+
+    // 总结内容
+    this.updateProcess(ProcessStatus.SUMMARIZING);
+    await this.summarizeContent();
+
+    // 解析总结
+    this.updateProcess(ProcessStatus.PARSING);
+    const html = await this.parseSummary();
+
+    // 显示内容
+    this.switchProgressAndContentVisibility(false);
+    this.updateSummary(html);
+  }
 
   private async extractContent(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -213,7 +235,7 @@ class SummaInsights {
     }
   }
 
-  // 修改 remove 方法
+  // remove 方法
   private remove(): void {
     if (this.hostNode) {
       this.hostNode.remove();
@@ -230,7 +252,7 @@ class SummaInsights {
 
   }
 
-  private copyMarkdown(): void {
+  private onCopy(): void {
     if (!this.shadowRoot) return;
 
     const markdownBody = this.shadowRoot.querySelector('.markdown-body');
@@ -263,26 +285,6 @@ class SummaInsights {
 
     this.shadowRoot.querySelector('.progress')?.classList.toggle('hidden', !showProgress);
     this.shadowRoot.querySelector('.markdown-body')?.classList.toggle('hidden', showProgress);
-  }
-
-  // refresh 方法
-  private async refresh(): Promise<void> {
-    // 切换到显示进度
-    this.switchProgressAndContentVisibility(true);
-
-    // 重新总结内容 
-    this.updateProcess(ProcessStatus.SUMMARIZING);
-    await this.summarizeContent();
-
-    // 解析总结
-    this.updateProcess(ProcessStatus.PARSING);
-    const html = await this.parseSummary();
-
-    // 切换到显示内容
-    this.switchProgressAndContentVisibility(false);
-    // 显示总结
-    this.updateSummary(html);
-
   }
 }
 

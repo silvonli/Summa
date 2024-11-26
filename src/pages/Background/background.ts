@@ -4,9 +4,9 @@ import { summaDebugLog } from '../../lib/utils';
 chrome.action.onClicked.addListener((tab: chrome.tabs.Tab) => {
   // 向当前标签页发送消息
   if (tab.id) {
-    summaDebugLog('发送 toggleSumma 消息到标签页:', tab.id);
+    summaDebugLog('发送 clickedSumma 消息到标签页:', tab.id);
     chrome.tabs.sendMessage(tab.id, {
-      action: 'toggleSumma'
+      action: 'clickedSumma'
     });
   }
 }); 
