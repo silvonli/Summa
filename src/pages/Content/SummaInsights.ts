@@ -96,9 +96,10 @@ class SummaInsights {
     const getStepHtml = (step: { status: ProcessStatus; text: string }) => {
       const isPending = step.status >= newStatus;
       const icon = isPending ? spinnerSvg : checkSvg;
+      const stepClass = isPending ? 'step pending' : 'step';
 
       return `
-        <div class="step">
+        <div class="${stepClass}">
           <span>
             ${icon}
           </span>
@@ -118,9 +119,9 @@ class SummaInsights {
   private updateSummary(html: string): void {
     if (!this.shadowRoot) return;
 
-    const markdownBody = this.shadowRoot?.querySelector('.markdown-body');
-
+    const markdownBody = this.shadowRoot.querySelector('.markdown-body');
     if (!markdownBody) return;
+
     markdownBody.innerHTML = html;
   }
 
@@ -153,11 +154,7 @@ class SummaInsights {
     }
 
     this.isShow = !this.isShow;
-    this.setVisibility(this.isShow);
-  }
-
-  private setVisibility(visible: boolean): void {
-    this.shadowRoot?.querySelector('.app')?.classList.toggle('hidden', !visible);
+    this.shadowRoot?.querySelector('.app')?.classList.toggle('hidden', !this.isShow);
   }
 
 
@@ -173,7 +170,7 @@ class SummaInsights {
   }
 
   private async parseSummary(): Promise<string> {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
     marked.use({
       async: false,
       pedantic: false,

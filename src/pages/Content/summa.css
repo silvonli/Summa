@@ -8,17 +8,15 @@
 :host {
   /* Colors */
   --summa-primary: #95c043;
-  --summa-primary-light: #e5fac3;
   --summa-primary-alpha: rgba(149, 192, 67, 0.3);
-  --summa-text-primary: #2d2d2d;
-  --summa-text-secondary: #6b7280;
-  --summa-text-pending: #9ca585;
-  --summa-danger: #ef4444;
   --summa-white: #ffffff;
   --summa-border: #e5e7eb;
 
   /* Shadows */
   --summa-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
+
+  --progress-text: #2d2d2d;
+  --progress-text-pending: #6b7280;
 
   /* Spacing */
   --spacing-xs: 6px;
@@ -29,8 +27,6 @@
   /* Border radius */
   --radius-sm: 6px;
   --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-full: 50%;
 
   --header-height: 48px;
 }
@@ -64,7 +60,6 @@
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--summa-border);
 }
-
 
 .content {
   display: flex;
@@ -100,6 +95,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  color: var(--progress-text);
 }
 
 .step span {
@@ -110,10 +106,14 @@
   height: 24px;
 }
 
+.step.pending {
+  color: var(--progress-text-pending);
+}
+
 .spinner {
   width: 20px;
   height: 20px;
-  color: var(--summa-primary-alpha);
+  color: var(--progress-text-pending);
   animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
@@ -142,9 +142,6 @@
   }
 }
 
-.step.pending {
-  color: var(--summa-text-pending);
-}
 
 .hidden {
   display: none !important;
