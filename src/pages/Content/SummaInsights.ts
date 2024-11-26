@@ -186,13 +186,13 @@ class SummaInsights {
   }
 
   private async summarizeContent(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
     const summary = this.content;
     this.summary = summary;
   }
 
   private async parseSummary(): Promise<string> {
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     marked.use({
       async: false,
       pedantic: false,
