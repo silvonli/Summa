@@ -10,7 +10,7 @@
   --summa-primary: #95c043;
   --summa-primary-alpha: rgba(149, 192, 67, 0.3);
   --summa-white: #ffffff;
-  --summa-border: #e5e7eb;
+  --summa-border: #D1D5DB;
 
   /* Shadows */
   --summa-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
@@ -34,6 +34,11 @@
   --scrollbar-width: 4px;
   --scrollbar-color: #D1D5DB;
   --scrollbar-radius: 2px;
+
+  --button-radius: 4px;
+  --button-hover-bg: #f3f4f6;
+  --button-active-bg: #e5e7eb;
+  --button-icon-color: #6b7280;
 }
 
 /* 确保所有文本元素继承字体 */
@@ -169,4 +174,51 @@
   display: none !important;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+
+.left-actions,
+.right-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-xs);
+  border: none;
+  background: none;
+  border-radius: var(--button-radius);
+  color: var(--button-icon-color);
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.button:active {
+  background-color: var(--button-active-bg);
+}
+
+.button .icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* 复制按钮特殊样式 */
+.copy-btn .copied-icon {
+  display: none;
+}
+
+.copy-btn.copied .copy-icon {
+  display: none;
+}
+
+.copy-btn.copied .copied-icon {
+  display: block;
 }

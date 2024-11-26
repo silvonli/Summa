@@ -249,7 +249,23 @@ class SummaInsights {
   private bindEvents(): void {
     if (!this.shadowRoot) return;
 
+    // 复制按钮
+    const copyBtn = this.shadowRoot.querySelector('.copy-btn');
+    copyBtn?.addEventListener('click', () => this.onCopy());
 
+    // 刷新按钮
+    const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
+    refreshBtn?.addEventListener('click', () => this.onRefresh());
+
+    // 关闭按钮
+    const closeBtn = this.shadowRoot.querySelector('.close-btn');
+    closeBtn?.addEventListener('click', () => this.hide());
+
+    // 设置按钮 (暂时只打印日志)
+    const settingsBtn = this.shadowRoot.querySelector('.settings-btn');
+    settingsBtn?.addEventListener('click', () => {
+      summaDebugLog('Settings clicked');
+    });
   }
 
   private onCopy(): void {
@@ -264,18 +280,18 @@ class SummaInsights {
     // 复制到剪贴板
     navigator.clipboard.writeText(markdownText)
       .then(() => {
-        const copyButton = this.shadowRoot?.querySelector('.copy-button');
-        if (copyButton) {
-          // 临时改变按钮文字显示复制成功
-          const originalText = copyButton.textContent;
-          copyButton.textContent = '✅ 已复制';
+        const copyBtn = this.shadowRoot?.querySelector('.copy-btn');
+        if (copyBtn) {
+          // 添加复制成功样式
+          copyBtn.classList.add('copied');
           setTimeout(() => {
-            copyButton.textContent = originalText;
+            copyBtn.classList.remove('copied');
           }, 2000);
         }
       })
       .catch(err => {
         console.error('复制失败:', err);
+        summaDebugLog('复制失败:', err);
       });
   }
 
