@@ -24,9 +24,9 @@ That's it.  Pretty simple.  There's also a drop-down option above to switch betw
 
 // 进度状态 
 enum ProcessStatus {
-  EXTRACTING = 'extracting',
-  SUMMARIZING = 'summarizing',
-  PARSING = 'parsing',
+  EXTRACTING = 0,
+  SUMMARIZING = 1,
+  PARSING = 2
 }
 
 class SummaInsights {
@@ -70,9 +70,9 @@ class SummaInsights {
 
     // 定义各状态对应的步骤显示
     const steps = [
-      { status: ProcessStatus.EXTRACTING, text: '正在提取内容...', icon: '🔄' },
-      { status: ProcessStatus.SUMMARIZING, text: '正在总结内容...', icon: '🔄' },
-      { status: ProcessStatus.PARSING, text: '正在解析...', icon: '🔄' },
+      { status: ProcessStatus.EXTRACTING, text: '正在提取内容...' },
+      { status: ProcessStatus.SUMMARIZING, text: '正在总结内容...' },
+      { status: ProcessStatus.PARSING, text: '正在解析...' },
     ];
 
     // 根据当前状态更新UI
@@ -82,12 +82,16 @@ class SummaInsights {
     // 更新进度条内容
     progress.innerHTML = `
       <div class="steps">
-        ${steps.map(step => `
-          <div class="step">
-            <span class="${step.status === newStatus ? 'loading' : 'check'}">${step.icon}</span>
-            ${step.text}
-          </div>
-        `).join('')}
+        ${steps.map(step => {
+      return `
+            <div class="step">
+              <span class="${step.status === newStatus ? 'loading' : 'check'}">
+                ${step.status >= newStatus ? '◌' : '✓'}
+              </span>
+              ${step.text}
+            </div>
+          `;
+    }).join('')}
       </div>
     `;
   }
