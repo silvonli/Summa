@@ -72,7 +72,7 @@ class SummaInsights {
     const steps = [
       { status: ProcessStatus.EXTRACTING, text: '正在提取内容...' },
       { status: ProcessStatus.SUMMARIZING, text: '正在总结内容...' },
-      { status: ProcessStatus.PARSING, text: '正在解析...' },
+      { status: ProcessStatus.PARSING, text: '正在解析总结文本...' },
     ];
 
     // 根据当前状态更新UI
@@ -80,18 +80,38 @@ class SummaInsights {
     if (!currentStep) return;
 
     // 更新进度条内容
+    const spinnerSvg = `
+      <svg class="spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle class="spinner-track" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+        <circle class="spinner-head" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    `;
+
+    const checkSvg = `
+      <svg class="check-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+
+    const getStepHtml = (step: { status: ProcessStatus; text: string }) => {
+      const isCurrentStep = step.status === newStatus;
+      const isPending = step.status >= newStatus;
+      const icon = isPending ? spinnerSvg : checkSvg;
+      const iconClass = isCurrentStep ? 'loading' : 'check';
+
+      return `
+        <div class="step">
+          <span class="${iconClass}">
+            ${icon}
+          </span>
+          ${step.text}
+        </div>
+      `;
+    };
+
     progress.innerHTML = `
       <div class="steps">
-        ${steps.map(step => {
-      return `
-            <div class="step">
-              <span class="${step.status === newStatus ? 'loading' : 'check'}">
-                ${step.status >= newStatus ? '◌' : '✓'}
-              </span>
-              ${step.text}
-            </div>
-          `;
-    }).join('')}
+        ${steps.map(getStepHtml).join('')}
       </div>
     `;
   }
@@ -149,12 +169,13 @@ class SummaInsights {
   }
 
   private async summarizeContent(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     const summary = this.content;
     this.summary = summary;
   }
 
   private async parseSummary(): Promise<string> {
+    await new Promise(resolve => setTimeout(resolve, 2000));
     marked.use({
       async: false,
       pedantic: false,

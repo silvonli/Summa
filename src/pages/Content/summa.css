@@ -96,24 +96,51 @@
 .step {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 8px;
+}
+
+.step span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  color: var(--summa-text-pending);
+  animation: spin 1s linear infinite;
+}
+
+.spinner-track {
+  opacity: 0.2;
+}
+
+.spinner-head {
+  stroke-dasharray: 80;
+  stroke-dashoffset: 60;
+}
+
+.check-icon {
+  width: 20px;
+  height: 20px;
   color: var(--summa-primary);
-  font-weight: 500;
-  font-size: 15px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .step.pending {
   color: var(--summa-text-pending);
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 .loading {
