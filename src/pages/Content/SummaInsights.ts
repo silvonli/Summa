@@ -94,14 +94,12 @@ class SummaInsights {
     `;
 
     const getStepHtml = (step: { status: ProcessStatus; text: string }) => {
-      const isCurrentStep = step.status === newStatus;
       const isPending = step.status >= newStatus;
       const icon = isPending ? spinnerSvg : checkSvg;
-      const iconClass = isCurrentStep ? 'loading' : 'check';
 
       return `
         <div class="step">
-          <span class="${iconClass}">
+          <span>
             ${icon}
           </span>
           ${step.text}

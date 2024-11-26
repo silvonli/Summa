@@ -31,6 +31,8 @@
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-full: 50%;
+
+  --header-height: 48px;
 }
 
 /* 确保所有文本元素继承字体 */
@@ -50,13 +52,13 @@
   background-color: var(--summa-white);
   border-radius: var(--radius-sm);
   box-shadow: var(--summa-shadow);
-  font-family: Arial, sans-serif;
   z-index: 999999;
   border: 1px solid var(--summa-border);
 }
 
 .header {
   display: flex;
+  height: var(--header-height);
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-md);
@@ -65,6 +67,9 @@
 
 
 .content {
+  display: flex;
+  flex-direction: column;
+  height: calc(80vh - var(--header-height));
   padding: var(--spacing-md);
   overflow-y: auto;
   overflow-x: hidden;
@@ -72,8 +77,6 @@
 
 .markdown-body {
   box-sizing: border-box;
-  min-width: 200px;
-  max-width: 400px;
   margin: 0 auto;
   padding: 0;
 }
@@ -96,7 +99,7 @@
 .step {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .step span {
@@ -110,8 +113,8 @@
 .spinner {
   width: 20px;
   height: 20px;
-  color: var(--summa-text-pending);
-  animation: spin 1s linear infinite;
+  color: var(--summa-primary-alpha);
+  animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .spinner-track {
@@ -143,11 +146,8 @@
   color: var(--summa-text-pending);
 }
 
-.loading {
-  display: inline-block;
-  animation: spin 1s linear infinite;
-}
-
 .hidden {
   display: none !important;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
