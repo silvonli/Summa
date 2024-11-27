@@ -1,6 +1,7 @@
 import { summaDebugLog } from '../../lib/utils';
 import summaTemplate from './summa.html';
 import { marked } from 'marked';
+import { icons } from '../../lib/icons';
 
 const extract_mock = `
 Marked - Markdown Parser
@@ -95,14 +96,12 @@ class SummaInsights {
 
     const getStepHtml = (step: { status: ProcessStatus; text: string }) => {
       const isPending = step.status >= newStatus;
-      const icon = isPending ? spinnerSvg : checkSvg;
+      const icon = isPending ? icons.spinner : icons.check;
       const stepClass = isPending ? 'step pending' : 'step';
 
       return `
         <div class="${stepClass}">
-          <span>
-            ${icon}
-          </span>
+          <span>${icon}</span>
           ${step.text}
         </div>
       `;
@@ -229,10 +228,30 @@ class SummaInsights {
 
       // 绑定事件处理
       this.bindEvents();
+
+      // 初始化图标
+      this.initializeIcons();
     } catch (error) {
       console.error('Failed to inject Summa:', error);
       summaDebugLog('注入失败:', error);
     }
+  }
+
+  private initializeIcons(): void {
+    if (!this.shadowRoot) return;
+
+    // 查找所有带有 data-icon 属性的按钮
+    const iconButtons = this.shadowRoot.querySelectorAll('[data-icon]');
+
+    iconButtons.forEach(button => {
+      const iconNames = button.getAttribute('data-icon')?.split(',') || [];
+      iconNames.forEach(name => {
+        const iconHtml = icons[name as keyof typeof icons];
+        if (iconHtml) {
+          button.innerHTML += iconHtml;
+        }
+      });
+    });
   }
 
   // remove 方法
