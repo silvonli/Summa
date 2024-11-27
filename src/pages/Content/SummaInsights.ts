@@ -2,26 +2,7 @@ import { summaDebugLog } from '../../lib/utils';
 import summaTemplate from './summa.html';
 import { marked } from 'marked';
 import { icons } from '../../lib/icons';
-
-const extract_mock = `
-Marked - Markdown Parser
-========================
-
-[Marked] lets you convert [Markdown] into HTML.  Markdown is a simple text format whose goal is to be very easy to read and write, even when not converted to HTML.  This demo page will let you type anything you like and see how it gets converted.  Live.  No more waiting around.
-
-How To Use The Demo
--------------------
-
-1. Type in stuff on the left.
-2. See the live updates on the right.
-
-That's it.  Pretty simple.  There's also a drop-down option above to switch between various views:
-
-- **Preview:**  A live display of the generated HTML as it would render in a browser.
-- **HTML Source:**  The generated HTML before your browser makes it pretty.
-- **Lexer Data:**  What [marked] uses internally, in case you like gory stuff like this.
-- **Quick Reference:**  A brief run-down of how to format things using markdown.
-`;
+import { ContentExtractor } from './ContentExtractor';
 
 // 进度状态 
 enum ProcessStatus {
@@ -180,18 +161,23 @@ class SummaInsights {
   }
 
   private async extractContent(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    this.content = extract_mock;
+    try {
+      // 获取当前页面的 HTML
+      const docClone = document.cloneNode(true) as Document;
+      const content = await ContentExtractor.extractFromDom(docClone);
+      this.content = content;
+    } catch (error) {
+      console.error('提取内容失败:', error);
+    }
   }
 
   private async summarizeContent(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const summary = this.content;
     this.summary = summary;
   }
 
   private async parseSummary(): Promise<string> {
-    await new Promise(resolve => setTimeout(resolve, 2000));
     marked.use({
       async: false,
       pedantic: false,

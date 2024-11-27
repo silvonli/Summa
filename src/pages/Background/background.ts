@@ -9,4 +9,4 @@ chrome.action.onClicked.addListener((tab: chrome.tabs.Tab) => {
       action: 'clickedSumma'
     });
   }
-}); 
+});
