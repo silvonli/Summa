@@ -219,9 +219,7 @@ class SummaInsights {
       // 拼接样式
       const style = `
       <style>
-        @import "${chrome.runtime.getURL('github-markdown.css')}";
-        @import "${chrome.runtime.getURL('summa.css')}";
-        @import "${chrome.runtime.getURL('model-menu.css')}";
+        @import "${chrome.runtime.getURL('content.styles.css')}";
       </style>
       `;
 

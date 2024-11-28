@@ -2,8 +2,8 @@
   position: absolute;
   background: var(--summa-white);
   border: 1px solid var(--summa-border);
-  border-radius: var(--model-menu-radius);
-  box-shadow: var(--model-menu-shadow);
+  border-radius: var(--menu-radius);
+  box-shadow: var(--menu-shadow);
   min-width: 200px;
   z-index: 10000;
   padding: var(--spacing-sm);
@@ -19,13 +19,13 @@
 
 .model-menu-item {
   padding: var(--spacing-sm);
-  border-radius: var(--model-menu-item-radius);
+  border-radius: var(--menu-item-radius);
   cursor: pointer;
-  color: var(--model-menu-text);
+  color: var(--menu-text);
   font-size: 14px;
   transition: background-color 0.2s ease;
 }
 
 .model-menu-item:hover {
-  background-color: var(--model-menu-hover-bg);
+  background-color: var(--menu-item-hover-bg);
 }

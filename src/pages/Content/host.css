@@ -1,0 +1,57 @@
+/* 重置和基础样式 */
+:host {
+  all: initial;
+  display: block;
+}
+
+/* 确保自定义属性在 Shadow DOM 中可用 */
+:host {
+  /* Colors */
+  --summa-primary: #95c043;
+  --summa-primary-alpha: rgba(149, 192, 67, 0.3);
+  --summa-white: #ffffff;
+  --summa-border: #D1D5DB;
+
+  /* Shadows */
+  --summa-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
+
+  --progress-text: #2d2d2d;
+  --progress-text-pending: #6b7280;
+
+  /* Spacing */
+  --spacing-xs: 6px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+
+  --header-height: 44px;
+
+  /* 滚动条相关变量 */
+  --scrollbar-width: 4px;
+  --scrollbar-color: #D1D5DB;
+  --scrollbar-radius: 2px;
+
+  --button-radius: 4px;
+  --button-hover-bg: #f3f4f6;
+  --button-icon-color: #6b7280;
+  --button-active-color: #6b7280b8;
+
+  --menu-radius: 12px;
+  --menu-item-radius: 6px;
+  --menu-item-hover-bg: #e5e7eb;
+  --menu-text: #2d2d2d;
+  --menu-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+}
+
+/* 确保所有文本元素继承字体 */
+:host * {
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}

@@ -1,4 +1,5 @@
 import SummaInsights from './SummaInsights';
+import './content.css';
 
 
 // 初始化

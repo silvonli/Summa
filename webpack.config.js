@@ -5,9 +5,11 @@ var webpack = require('webpack'),
   CopyWebpackPlugin = require('copy-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   TerserPlugin = require('terser-webpack-plugin');
+
 var { CleanWebpackPlugin } = require('clean-webpack-plugin');
 var ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 var ReactRefreshTypeScript = require('react-refresh-typescript');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
@@ -54,6 +56,20 @@ var options = {
   module: {
     rules: [
       {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1, // 处理 `@import` 的加载顺序
+            },
+          },
+        ],
+        // exclude: path.resolve(__dirname, 'src/pages/Options'),
+        include: path.resolve(__dirname, 'src/pages/Content'),
+      },
+      {
         // look for .css or .scss files
         test: /\.(css|scss)$/,
         // in the `src` directory
@@ -71,6 +87,7 @@ var options = {
             },
           },
         ],
+        exclude: path.resolve(__dirname, 'src/pages/Content'),
       },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
@@ -153,33 +170,16 @@ var options = {
         },
       ],
     }),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: 'src/pages/Content/summa.css',
-          to: path.join(__dirname, 'build'),
-          force: true,
-        },
-      ],
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: 'src/pages/Content/github-markdown.css',
-          to: path.join(__dirname, 'build'),
-          force: true,
-        },
-      ],
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: 'src/pages/Content/model-menu.css',
-          to: path.join(__dirname, 'build'),
-          force: true,
-        },
-      ],
-    }),
+    // new CopyWebpackPlugin({
+    //   patterns: [
+    //     {
+    //       from: 'src/pages/Content/content.styles.css',
+    //       to: path.join(__dirname, 'build'),
+    //       force: true,
+    //     },
+    //   ],
+    // }),
+    new MiniCssExtractPlugin({ filename: 'content.styles.css' }),
     new CopyWebpackPlugin({
       patterns: [
         {
