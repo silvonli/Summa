@@ -1,7 +1,7 @@
 import { Readability } from '@mozilla/readability';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
-import { summaDebugLog } from '../../lib/utils';
+import { summaDebugLog } from '../../../lib/utils';
 
 export class ContentExtractor {
   private static turndownService: TurndownService;

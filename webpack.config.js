@@ -66,7 +66,6 @@ var options = {
             },
           },
         ],
-        // exclude: path.resolve(__dirname, 'src/pages/Options'),
         include: path.resolve(__dirname, 'src/pages/Content'),
       },
       {

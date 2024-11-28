@@ -2,7 +2,7 @@ import { summaDebugLog } from '../../lib/utils';
 import summaTemplate from './summa.html';
 import { marked } from 'marked';
 import { icons } from '../../lib/icons';
-import { ContentExtractor } from './ContentExtractor';
+import { ContentExtractor } from './modules/ContentExtractor';
 import { DEFAULT_MODELS, LLMModel } from '../../types/llm';
 import { ModelMenu } from './ModelMenu';
 
@@ -210,32 +210,23 @@ class SummaInsights {
   // 注入页面
   private inject(): void {
     try {
-      // 创建容器
       this.hostNode = document.createElement('div');
-
-      // 创建 Shadow DOM
       this.shadowRoot = this.hostNode.attachShadow({ mode: 'open' });
 
-      // 拼接样式
-      const style = `
-      <style>
-        @import "${chrome.runtime.getURL('content.styles.css')}";
-      </style>
-      `;
+      // 创建独立的 style 元素
+      const styleSheet = document.createElement('link');
+      styleSheet.rel = 'stylesheet';
+      styleSheet.href = chrome.runtime.getURL('content.styles.css');
 
-      // 拼接 HTML
-      const template = style + summaTemplate;
-      summaDebugLog('开始注入：', template);
-      this.shadowRoot.innerHTML = template;
+      // 先添加样式表
+      this.shadowRoot.appendChild(styleSheet);
 
-      // 添加到页面
-      summaDebugLog('开始添加到页面');
+      // 再添加 HTML 内容
+      this.shadowRoot.innerHTML += summaTemplate;
+
       document.body.appendChild(this.hostNode);
 
-      // 绑定事件处理
       this.bindEvents();
-
-      // 初始化图标
       this.initializeIcons();
     } catch (error) {
       console.error('Failed to inject Summa:', error);
