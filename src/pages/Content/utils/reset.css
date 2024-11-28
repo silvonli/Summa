@@ -1,0 +1,13 @@
+/* 重置和基础样式 */
+:host {
+  all: initial;
+  display: block;
+}
+
+/* 确保所有文本元素继承字体 */
+:host * {
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
