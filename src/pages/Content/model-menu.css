@@ -2,10 +2,11 @@
   position: absolute;
   background: var(--summa-white);
   border: 1px solid var(--summa-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   box-shadow: var(--summa-shadow);
   min-width: 200px;
-  z-index: 2147483647;
+  z-index: 10000;
+  padding: var(--spacing-sm);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -17,7 +18,8 @@
 }
 
 .model-menu-item {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--progress-text);
   font-size: 14px;
@@ -25,15 +27,5 @@
 }
 
 .model-menu-item:hover {
-  background-color: var(--button-hover-bg);
-}
-
-.model-menu-item:first-child {
-  border-top-left-radius: var(--radius-sm);
-  border-top-right-radius: var(--radius-sm);
-}
-
-.model-menu-item:last-child {
-  border-bottom-left-radius: var(--radius-sm);
-  border-bottom-right-radius: var(--radius-sm);
+  background-color: var(--button-active-bg);
 }
