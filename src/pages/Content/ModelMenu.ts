@@ -45,8 +45,8 @@ export class ModelMenu {
     const offsetRect = offsetParent?.getBoundingClientRect() || { top: 0, left: 0 };
 
     // 使用 Math.max 确保位置不会出现负值
-    this.menuElement.style.top = `${Math.max(rect.bottom - (offsetRect?.top || 0), 0) + 2}px`;
-    this.menuElement.style.left = `${Math.max(rect.left - (offsetRect?.left || 0), 0)}px`;
+    this.menuElement.style.top = `${Math.max(rect.bottom - (offsetRect?.top || 0), 0) + 0}px`;
+    this.menuElement.style.left = `${Math.max(rect.left - (offsetRect?.left || 0), 0) - 12}px`;
     this.menuElement.classList.add('show');
   }
 

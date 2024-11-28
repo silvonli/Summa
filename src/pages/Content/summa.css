@@ -28,7 +28,7 @@
   --radius-sm: 6px;
   --radius-md: 12px;
 
-  --header-height: 48px;
+  --header-height: 44px;
 
   /* 滚动条相关变量 */
   --scrollbar-width: 4px;
@@ -37,8 +37,15 @@
 
   --button-radius: 4px;
   --button-hover-bg: #f3f4f6;
-  --button-active-bg: #e5e7eb;
   --button-icon-color: #6b7280;
+  --button-active-color: #6b7280b8;
+
+  --model-menu-radius: 12px;
+  --model-menu-item-radius: 6px;
+  --model-menu-hover-bg: #e5e7eb;
+  --model-menu-text: #2d2d2d;
+  --model-menu-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
 }
 
 /* 确保所有文本元素继承字体 */
@@ -204,6 +211,7 @@
   border-radius: var(--button-radius);
   color: var(--button-icon-color);
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .button:hover {
@@ -211,12 +219,12 @@
 }
 
 .button:active {
-  background-color: var(--button-active-bg);
+  color: var(--button-active-color);
 }
 
 .button .icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 /* 复制按钮特殊样式 */
