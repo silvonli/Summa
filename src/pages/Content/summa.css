@@ -59,7 +59,7 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--summa-border);
   box-shadow: var(--summa-shadow);
-  z-index: 2147483647;
+  z-index: 2147483646;
   overflow: hidden;
 
   /* 过渡动画属性 */

@@ -1,0 +1,39 @@
+.model-menu {
+  position: absolute;
+  background: var(--summa-white);
+  border: 1px solid var(--summa-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--summa-shadow);
+  min-width: 200px;
+  z-index: 2147483647;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.model-menu.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.model-menu-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  color: var(--progress-text);
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.model-menu-item:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.model-menu-item:first-child {
+  border-top-left-radius: var(--radius-sm);
+  border-top-right-radius: var(--radius-sm);
+}
+
+.model-menu-item:last-child {
+  border-bottom-left-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}

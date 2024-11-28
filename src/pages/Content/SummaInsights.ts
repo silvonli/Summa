@@ -3,6 +3,8 @@ import summaTemplate from './summa.html';
 import { marked } from 'marked';
 import { icons } from '../../lib/icons';
 import { ContentExtractor } from './ContentExtractor';
+import { DEFAULT_MODELS, LLMModel } from '../../types/llm';
+import { ModelMenu } from './ModelMenu';
 
 // 进度状态 
 enum ProcessStatus {
@@ -19,6 +21,8 @@ class SummaInsights {
   private summary: string;
   private currentUrl: string;
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
+  private modelMenu: ModelMenu | null = null;
+  private currentModel: LLMModel = DEFAULT_MODELS[0];
 
   constructor() {
     this.hostNode = null;
@@ -95,11 +99,6 @@ class SummaInsights {
     markdownBody.innerHTML = html;
   }
 
-  // onRefresh 方法
-  private async onRefresh(): Promise<void> {
-    await this.processContent(false);
-  }
-
   // clickedSumma 方法
   private async onClickedSumma(): Promise<void> {
     // 如果已经显示,直接隐藏
@@ -110,7 +109,7 @@ class SummaInsights {
 
     const newUrl = window.location.href;
 
-    // 如果未初始化或 URL 发生变化,需要重新初始化
+    // 如果未初始化或 URL 发生变化,需要重新注入
     if (!this.hostNode || this.currentUrl !== newUrl) {
       // 如果存在旧的节点,先移除
       if (this.hostNode) {
@@ -122,10 +121,10 @@ class SummaInsights {
       await this.processContent(true);
     }
 
-    // 显示内容
     this.show();
   }
 
+  // 隐藏界面
   private hide(): void {
     this.isShow = false;
     requestAnimationFrame(() => {
@@ -139,9 +138,10 @@ class SummaInsights {
     }
   }
 
+  // 显示界面
   private show(): void {
     this.isShow = true;
-    // 使用 requestAnimationFrame 确保过渡动画正常执行
+
     requestAnimationFrame(() => {
       this.shadowRoot?.querySelector('.app')?.classList.remove('hidden');
     });
@@ -151,9 +151,10 @@ class SummaInsights {
     document.addEventListener('mousedown', this.mouseEventHandler);
   }
 
+  // 处理内容
   private async processContent(shouldExtract = false): Promise<void> {
     // 显示进度条
-    this.switchProgressAndContentVisibility(true);
+    this.switchContentVisibility(true);
 
     if (shouldExtract) {
       this.updateProcess(ProcessStatus.EXTRACTING);
@@ -169,10 +170,11 @@ class SummaInsights {
     const html = await this.parseSummary();
 
     // 显示内容
-    this.switchProgressAndContentVisibility(false);
+    this.switchContentVisibility(false);
     this.updateSummary(html);
   }
 
+  // 提取内容
   private async extractContent(): Promise<void> {
     try {
       // 获取当前页面的 HTML
@@ -184,13 +186,16 @@ class SummaInsights {
     }
   }
 
+  // 总结内容
   private async summarizeContent(): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 1000));
+    // 使用当前模型 this.currentModel总结内容 todo
     const summary = this.content;
     this.summary = summary;
     summaDebugLog('summary', this.summary);
   }
 
+  // 解析总结
   private async parseSummary(): Promise<string> {
     marked.use({
       async: false,
@@ -202,6 +207,7 @@ class SummaInsights {
     return html;
   }
 
+  // 注入页面
   private inject(): void {
     try {
       // 创建容器
@@ -213,8 +219,9 @@ class SummaInsights {
       // 拼接样式
       const style = `
       <style>
-      @import "${chrome.runtime.getURL('github-markdown.css')}";
+        @import "${chrome.runtime.getURL('github-markdown.css')}";
         @import "${chrome.runtime.getURL('summa.css')}";
+        @import "${chrome.runtime.getURL('model-menu.css')}";
       </style>
       `;
 
@@ -255,6 +262,17 @@ class SummaInsights {
     });
   }
 
+  private getModelMenu(): ModelMenu {
+    if (!this.modelMenu && this.shadowRoot) {
+      this.modelMenu = new ModelMenu(
+        this.shadowRoot,
+        DEFAULT_MODELS,
+        this.onModelSelect.bind(this)
+      );
+    }
+    return this.modelMenu!;
+  }
+
   // remove 方法
   private remove(): void {
     if (this.mouseEventHandler) {
@@ -269,6 +287,8 @@ class SummaInsights {
       this.content = '';
       this.summary = '';
     }
+
+    this.modelMenu = null;
   }
 
   private bindEvents(): void {
@@ -280,18 +300,26 @@ class SummaInsights {
 
     // 刷新按钮
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
-    refreshBtn?.addEventListener('click', () => this.onRefresh());
+    refreshBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menu = this.getModelMenu();
+
+      if (menu.isVisible()) {
+        menu.hide();
+      } else {
+        menu.show(e.currentTarget as HTMLElement);
+      }
+    });
 
     // 关闭按钮
     const closeBtn = this.shadowRoot.querySelector('.close-btn');
-    closeBtn?.addEventListener('click', () => this.hide());
+    closeBtn?.addEventListener('click', () => this.onClose());
 
-    // 设置按钮 (暂时只打印日志)
+    // 设置按钮
     const settingsBtn = this.shadowRoot.querySelector('.settings-btn');
-    settingsBtn?.addEventListener('click', () => {
-      summaDebugLog('Settings clicked');
-    });
+    settingsBtn?.addEventListener('click', () => this.onSettings());
   }
+
 
   private onCopy(): void {
     if (!this.shadowRoot) return;
@@ -320,15 +348,28 @@ class SummaInsights {
       });
   }
 
-  // 切换进度条和内容区域的显示状态
-  private switchProgressAndContentVisibility(showProgress: boolean): void {
+  private onModelSelect(model: LLMModel): void {
+    this.currentModel = model;
+    this.processContent();
+  }
+
+  private onClose(): void {
+    this.hide();
+  }
+
+  private onSettings(): void {
+    summaDebugLog('Settings clicked');
+  }
+
+  // 切换内容区域的显示内容
+  private switchContentVisibility(showProgress: boolean): void {
     if (!this.shadowRoot) return;
 
     this.shadowRoot.querySelector('.progress')?.classList.toggle('hidden', !showProgress);
     this.shadowRoot.querySelector('.markdown-body')?.classList.toggle('hidden', showProgress);
   }
 
-  // 统一处理所有鼠标事件
+  // 处理所有鼠标事件
   private handleMouseEvent(event: MouseEvent): void {
     if (!this.hostNode) return;
 
@@ -341,6 +382,7 @@ class SummaInsights {
       this.hide();
     }
   }
+
 }
 
 export default SummaInsights;
