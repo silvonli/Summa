@@ -13,7 +13,7 @@ enum ProcessStatus {
   PARSING = 2
 }
 
-class SummaInsights {
+class SummaPanel {
   private hostNode: HTMLDivElement | null;
   private shadowRoot: ShadowRoot | null;
   private isShow: boolean;
@@ -128,7 +128,7 @@ class SummaInsights {
   private hide(): void {
     this.isShow = false;
     requestAnimationFrame(() => {
-      this.shadowRoot?.querySelector('.app')?.classList.add('hidden');
+      this.shadowRoot?.querySelector('.panel')?.classList.add('hidden');
     });
 
     // 移除事件监听
@@ -143,7 +143,7 @@ class SummaInsights {
     this.isShow = true;
 
     requestAnimationFrame(() => {
-      this.shadowRoot?.querySelector('.app')?.classList.remove('hidden');
+      this.shadowRoot?.querySelector('.panel')?.classList.remove('hidden');
     });
 
     // 添加统一的鼠标事件监听
@@ -374,4 +374,4 @@ class SummaInsights {
 
 }
 
-export default SummaInsights;
+export default SummaPanel;

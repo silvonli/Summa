@@ -1,4 +1,4 @@
-.app {
+.panel {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -16,7 +16,7 @@
   transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.app.hidden {
+.panel.hidden {
   display: block !important;
   /* 确保隐藏状态下不可交互 */
   pointer-events: none;
