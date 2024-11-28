@@ -3,7 +3,7 @@
 @import "./summa.css";
 @import "./menu.css"; */
 
-@import url("./github-markdown.css");
-@import url("./host.css");
-@import url("./summa.css");
-@import url("./menu.css");
+@import "./utils/github-markdown.css";
+@import "./modules/host.css";
+@import "./modules/SummaPanel.css";
+@import "./modules/ModelMenu.css";

@@ -1,9 +1,9 @@
-import { summaDebugLog } from '../../lib/utils';
-import summaTemplate from './summa.html';
+import { summaDebugLog } from '../../../lib/utils';
+import htmlTemplate from './SummaPanel.html';
 import { marked } from 'marked';
-import { icons } from '../../lib/icons';
-import { ContentExtractor } from './modules/ContentExtractor';
-import { DEFAULT_MODELS, LLMModel } from '../../types/llm';
+import { icons } from '../../../lib/icons';
+import { ContentExtractor } from '../utils/ContentExtractor';
+import { DEFAULT_MODELS, LLMModel } from '../../../types/llm';
 import { ModelMenu } from './ModelMenu';
 
 // 进度状态 
@@ -222,7 +222,7 @@ class SummaPanel {
       this.shadowRoot.appendChild(styleSheet);
 
       // 再添加 HTML 内容
-      this.shadowRoot.innerHTML += summaTemplate;
+      this.shadowRoot.innerHTML += htmlTemplate;
 
       document.body.appendChild(this.hostNode);
 

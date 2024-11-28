@@ -1,4 +1,4 @@
-import SummaPanel from './SummaPanel';
+import SummaPanel from './modules/SummaPanel';
 import './content.css';
 
 

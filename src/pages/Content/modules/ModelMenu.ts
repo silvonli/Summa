@@ -1,4 +1,4 @@
-import { LLMModel } from '../../types/llm';
+import { LLMModel } from '../../../types/llm';
 
 export class ModelMenu {
   private menuElement: HTMLElement;
