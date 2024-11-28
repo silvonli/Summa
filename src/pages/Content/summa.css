@@ -61,6 +61,17 @@
   box-shadow: var(--summa-shadow);
   z-index: 999999;
   overflow: hidden;
+
+  /* 过渡动画属性 */
+  opacity: 1;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app.hidden {
+  display: block !important;
+  /* 确保隐藏状态下不可交互 */
+  pointer-events: none;
+  opacity: 0;
 }
 
 .header {

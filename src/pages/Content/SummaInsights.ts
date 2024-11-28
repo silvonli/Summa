@@ -128,7 +128,9 @@ class SummaInsights {
 
   private hide(): void {
     this.isShow = false;
-    this.shadowRoot?.querySelector('.app')?.classList.add('hidden');
+    requestAnimationFrame(() => {
+      this.shadowRoot?.querySelector('.app')?.classList.add('hidden');
+    });
 
     // 移除事件监听
     if (this.mouseEventHandler) {
@@ -139,7 +141,10 @@ class SummaInsights {
 
   private show(): void {
     this.isShow = true;
-    this.shadowRoot?.querySelector('.app')?.classList.remove('hidden');
+    // 使用 requestAnimationFrame 确保过渡动画正常执行
+    requestAnimationFrame(() => {
+      this.shadowRoot?.querySelector('.app')?.classList.remove('hidden');
+    });
 
     // 添加统一的鼠标事件监听
     this.mouseEventHandler = this.handleMouseEvent.bind(this);
