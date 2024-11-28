@@ -1,6 +1,7 @@
 import { Readability } from '@mozilla/readability';
 import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
+import { summaDebugLog } from '../../lib/utils';
 
 export class ContentExtractor {
   private static turndownService: TurndownService;
@@ -55,8 +56,10 @@ export class ContentExtractor {
       }
     }
 
+    summaDebugLog('html article content', article.content);
     // 转换为 Markdown
     let markdown = turndownService.turndown(article.content);
+    summaDebugLog('markdown article content', markdown);
 
     // 清理特殊的头部引用
     return markdown.replace(/\[\]\(#[^)]*\)/g, '');

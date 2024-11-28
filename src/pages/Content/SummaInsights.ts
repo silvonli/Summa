@@ -175,6 +175,7 @@ class SummaInsights {
     await new Promise(resolve => setTimeout(resolve, 1000));
     const summary = this.content;
     this.summary = summary;
+    summaDebugLog('summary', this.summary);
   }
 
   private async parseSummary(): Promise<string> {
@@ -184,6 +185,7 @@ class SummaInsights {
       gfm: true,
     });
     const html = marked.parse(this.summary) as string;
+    summaDebugLog('html summary', html);
     return html;
   }
 
