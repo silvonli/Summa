@@ -17,6 +17,7 @@ class SummaInsights {
   private isShow: boolean;
   private content: string;
   private summary: string;
+  private currentUrl: string;
 
   constructor() {
     this.hostNode = null;
@@ -24,6 +25,7 @@ class SummaInsights {
     this.isShow = false;
     this.content = '';
     this.summary = '';
+    this.currentUrl = '';
   }
 
   init(): void {
@@ -60,20 +62,6 @@ class SummaInsights {
     // 根据当前状态更新UI
     const currentStep = steps.find(step => step.status === newStatus);
     if (!currentStep) return;
-
-    // 更新进度条内容
-    const spinnerSvg = `
-      <svg class="spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle class="spinner-track" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-        <circle class="spinner-head" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-      </svg>
-    `;
-
-    const checkSvg = `
-      <svg class="check-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
 
     const getStepHtml = (step: { status: ProcessStatus; text: string }) => {
       const isPending = step.status >= newStatus;
@@ -112,14 +100,22 @@ class SummaInsights {
 
   // clickedSumma 方法
   private async onClickedSumma(): Promise<void> {
-    // 如果已经显示，直接隐藏
+    // 如果已经显示,直接隐藏
     if (this.isShow) {
       this.hide();
       return;
     }
 
-    // 如果未初始化，进行初始化
-    if (!this.hostNode) {
+    const newUrl = window.location.href;
+
+    // 如果未初始化或 URL 发生变化,需要重新初始化
+    if (!this.hostNode || this.currentUrl !== newUrl) {
+      // 如果存在旧的节点,先移除
+      if (this.hostNode) {
+        this.remove();
+      }
+
+      this.currentUrl = newUrl;
       this.inject();
       await this.processContent(true);
     }
@@ -200,8 +196,8 @@ class SummaInsights {
       // 拼接样式
       const style = `
       <style>
+      @import "${chrome.runtime.getURL('github-markdown.css')}";
         @import "${chrome.runtime.getURL('summa.css')}";
-        @import "${chrome.runtime.getURL('github-markdown.css')}";
       </style>
       `;
 

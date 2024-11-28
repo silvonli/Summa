@@ -57,9 +57,10 @@
   height: 80vh;
   background-color: var(--summa-white);
   border-radius: var(--radius-sm);
+  border: 1px solid var(--summa-border);
   box-shadow: var(--summa-shadow);
   z-index: 999999;
-  border: 1px solid var(--summa-border);
+  overflow: hidden;
 }
 
 .header {
@@ -72,15 +73,18 @@
 }
 
 .content {
-  /* 布局属性 */
-  display: flex;
-  flex-direction: column;
   height: calc(80vh - var(--header-height));
-  padding: var(--spacing-md);
-
+  padding: var(--spacing-lg);
   /* 滚动行为 */
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.markdown-body {
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0;
+  min-height: 100%;
 }
 
 /* Webkit 滚动条样式 */
@@ -95,12 +99,6 @@
 .content::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-color);
   border-radius: var(--scrollbar-radius);
-}
-
-.markdown-body {
-  box-sizing: border-box;
-  margin: 0 auto;
-  padding: 0;
 }
 
 .progress {
