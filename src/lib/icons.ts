@@ -13,7 +13,7 @@ export const icons = {
     <path d="M4 12C4 7.58172 7.58172 4 12 4C15.3 4 18.1 5.9 19.4 8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M20 12C20 16.4183 16.4183 20 12 20C8.7 20 5.9 18.1 4.6 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     <path d="M20 4V8H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M4 16V20H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M8 16H4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
   </svg>`,
 
   settings: `<svg class="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

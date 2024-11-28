@@ -18,6 +18,7 @@ class SummaInsights {
   private content: string;
   private summary: string;
   private currentUrl: string;
+  private mouseEventHandler: ((event: MouseEvent) => void) | null;
 
   constructor() {
     this.hostNode = null;
@@ -26,6 +27,7 @@ class SummaInsights {
     this.content = '';
     this.summary = '';
     this.currentUrl = '';
+    this.mouseEventHandler = null;
   }
 
   init(): void {
@@ -127,11 +129,21 @@ class SummaInsights {
   private hide(): void {
     this.isShow = false;
     this.shadowRoot?.querySelector('.app')?.classList.add('hidden');
+
+    // 移除事件监听
+    if (this.mouseEventHandler) {
+      document.removeEventListener('mousedown', this.mouseEventHandler);
+      this.mouseEventHandler = null;
+    }
   }
 
   private show(): void {
     this.isShow = true;
     this.shadowRoot?.querySelector('.app')?.classList.remove('hidden');
+
+    // 添加统一的鼠标事件监听
+    this.mouseEventHandler = this.handleMouseEvent.bind(this);
+    document.addEventListener('mousedown', this.mouseEventHandler);
   }
 
   private async processContent(shouldExtract = false): Promise<void> {
@@ -240,6 +252,11 @@ class SummaInsights {
 
   // remove 方法
   private remove(): void {
+    if (this.mouseEventHandler) {
+      document.removeEventListener('mousedown', this.mouseEventHandler);
+      this.mouseEventHandler = null;
+    }
+
     if (this.hostNode) {
       this.hostNode.remove();
       this.hostNode = null;
@@ -304,6 +321,20 @@ class SummaInsights {
 
     this.shadowRoot.querySelector('.progress')?.classList.toggle('hidden', !showProgress);
     this.shadowRoot.querySelector('.markdown-body')?.classList.toggle('hidden', showProgress);
+  }
+
+  // 统一处理所有鼠标事件
+  private handleMouseEvent(event: MouseEvent): void {
+    if (!this.hostNode) return;
+
+    const target = event.target as Node;
+
+    // 检查点击是否在宿主元素内
+    const isClickInside = this.hostNode.contains(target) || target === this.hostNode;
+
+    if (!isClickInside) {
+      this.hide();
+    }
   }
 }
 
