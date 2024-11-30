@@ -3,15 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Switch } from "../../components/ui/switch"
-import { Settings, Plus, Copy, ExternalLink } from 'lucide-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip"
+import { Label } from "../../components/ui/label"
+import { AddModelDialog } from "./modules/AddModelDialog"
 import { LLMProvider, DEFAULT_PROVIDERS } from "../../types/provider"
 import "../../globals.css"
+
 
 // 使用 LLMProvider 类型并扩展它
 type ProviderItem = LLMProvider & {
@@ -128,14 +124,12 @@ const ProviderConfig: React.FC<{ provider: LLMProvider }> = ({ provider }) => {
 
       {/* Action Buttons */}
       <div className="mt-4 flex gap-2">
-        <Button variant="outline" className="gap-2">
-          <Plus className="w-4 h-4" />
-          添加
-        </Button>
+        <AddModelDialog />
       </div>
     </div>
   )
 }
+
 
 const Options: React.FC = () => {
   // 添加状态管理当前选中的服务
