@@ -347,7 +347,11 @@ class SummaPanel {
   }
 
   private onSettings(): void {
-    summaDebugLog('Settings clicked');
+    // 使用 chrome.runtime.sendMessage 来请求打开选项页面
+    chrome.runtime.sendMessage({ action: 'openOptionsPage' });
+    // 隐藏当前面板
+    this.hide();
+    summaDebugLog('Settings clicked, requesting to open options page');
   }
 
   // 切换内容区域的显示内容

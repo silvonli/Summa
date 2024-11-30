@@ -40,7 +40,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 var options = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    options: path.join(__dirname, 'src', 'pages', 'Options', 'index.jsx'),
+    options: path.join(__dirname, 'src', 'pages', 'Options', 'Options.tsx'),
     background: path.join(__dirname, 'src', 'pages', 'Background', 'background.ts'),
     contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'content.ts'),
   },
