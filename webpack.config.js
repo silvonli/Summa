@@ -68,7 +68,6 @@ var options = {
         ],
         include: path.resolve(__dirname, 'src/pages/Content'),
       },
-
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader'],

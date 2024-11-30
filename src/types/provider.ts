@@ -21,7 +21,7 @@ export type LLMModel = {
 /**
  * 默认提供商
  */
-export const PROVIDERS_LIST: LLMProvider[] = [
+export const DEFAULT_PROVIDERS: LLMProvider[] = [
   {
     id: 'ANTHROPIC',
     name: 'Anthropic',
@@ -199,3 +199,25 @@ export const SYSTEM_MODELS: Record<string, LLMModel[]> = {
     }
   ]
 }
+
+
+/**
+ * 模型配置示例
+ */
+export const DEFAULT_MODELS: LLMModel[] = [
+  {
+    id: 'gpt-3.5-turbo',
+    name: 'GPT-3.5 Turbo',
+    provider: 'OPENAI',
+  },
+  {
+    id: 'claude-3-sonnet',
+    name: 'Claude 3 Sonnet',
+    provider: 'ANTHROPIC',
+  },
+  {
+    id: 'openai/gpt-4o-mini',
+    name: 'GPT-4o-mini',
+    provider: 'OPENROUTER',
+  }
+]; 

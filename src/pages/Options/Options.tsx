@@ -10,33 +10,39 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../components/ui/tooltip"
+import { LLMProvider, DEFAULT_PROVIDERS } from "../../types/provider"
 import "../../globals.css"
 
-// 定义服务项类型
-type ServiceItem = {
-  name: string
+// 使用 LLMProvider 类型并扩展它
+type ProviderItem = LLMProvider & {
   icon: string
   active?: boolean
   baseUrl?: boolean
 }
 
-// 抽取服务列表为常量
-const SERVICE_ITEMS: ServiceItem[] = [
-  { name: "Anthropic", icon: "🤖" },
-  { name: "OpenAI", icon: "🧠" },
-  { name: "Google AI", icon: "🌐" },
-  { name: "Groq", icon: "⚡" },
-  { name: "HuggingFace", icon: "🤗" },
-  { name: "OpenRouter", icon: "🔄" },
-  { name: "DeepSeek", icon: "🔍" },
-  { name: "Mistral AI", icon: "🌟" },
-  { name: "OpenAI Like", icon: "🤖" },
-  { name: "xAI", icon: "✨" },
-  { name: "Cohere", icon: "🎯" },
-  { name: "Azure OpenAI", icon: "☁️" },
-  { name: "LMStudio", icon: "🔬", baseUrl: true },
-  { name: "Ollama", icon: "🐪", baseUrl: true },
-]
+// 定义图标映射
+const PROVIDER_ICONS: Record<string, string> = {
+  ANTHROPIC: "🎯",
+  OPENAI: "🧠",
+  GOOGLE: "🌐",
+  GROQ: "⚡",
+  HUGGINGFACE: "🤗",
+  OPENROUTER: "✨",
+  DEEPSEEK: "🔍",
+  MISTRAL: "🌟",
+  OPENAI_LIKE: "🤖",
+  AZURE: "☁️",
+  LMSTUDIO: "🔬",
+  OLLAMA: "🐪"
+}
+
+// 使用 PROVIDERS_LIST 初始化 PROVIDER_ITEMS
+const PROVIDER_ITEMS: ProviderItem[] = DEFAULT_PROVIDERS.map(provider => ({
+  ...provider,
+  icon: PROVIDER_ICONS[provider.id] || "🔧", // 使用默认图标作为后备
+  baseUrl: ["LMSTUDIO", "OLLAMA", "OPENAI_LIKE"].includes(provider.id),
+  active: false
+}))
 
 // 创建通用的服务配置组件
 const ServiceConfig: React.FC<{ serviceName: string }> = ({ serviceName }) => {
@@ -169,10 +175,10 @@ const ServiceConfig: React.FC<{ serviceName: string }> = ({ serviceName }) => {
 
 const Options: React.FC = () => {
   // 添加状态管理当前选中的服务
-  const [selectedService, setSelectedService] = useState<string>("OpenAI")
+  const [selectedService, setSelectedService] = useState<string>("openai")
 
-  const handleServiceSelect = (serviceName: string) => {
-    setSelectedService(serviceName)
+  const handleServiceSelect = (serviceId: string) => {
+    setSelectedService(serviceId)
   }
 
   return (
@@ -194,11 +200,11 @@ const Options: React.FC = () => {
           <span className="font-medium">模型服务</span>
         </div>
         <nav className="p-2 space-y-1">
-          {SERVICE_ITEMS.map((item) => (
+          {PROVIDER_ITEMS.map((item) => (
             <button
-              key={item.name}
-              onClick={() => handleServiceSelect(item.name)}
-              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${selectedService === item.name ? "bg-secondary" : "hover:bg-secondary/80"
+              key={item.id}
+              onClick={() => handleServiceSelect(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${selectedService === item.id ? "bg-secondary" : "hover:bg-secondary/80"
                 }`}
             >
               <span className="w-5 h-5 flex items-center justify-center">
