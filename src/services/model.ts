@@ -124,9 +124,9 @@ export function getXAIModel(apiKey: OptionalApiKey, model: string) {
   return openai(model);
 }
 
-export function getModel(provider: string, model: string, apiKeys?: Record<string, string>) {
+export function getModel(provider: string, model: string, apiKeys?: Record<string, string>, baseURLs?: Record<string, string>) {
   const apiKey = getAPIKey(provider, apiKeys);
-  const baseURL = getBaseURL(provider);
+  const baseURL = getBaseURL(provider, baseURLs);
 
   switch (provider) {
     case 'Anthropic':
