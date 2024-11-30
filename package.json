@@ -13,9 +13,17 @@
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.0.2",
+    "@ai-sdk/cohere": "^1.0.3",
+    "@ai-sdk/google": "^1.0.4",
+    "@ai-sdk/mistral": "^1.0.3",
+    "@ai-sdk/openai": "^1.0.5",
     "@mozilla/readability": "^0.5.0",
+    "@openrouter/ai-sdk-provider": "^0.0.6",
+    "ai": "^4.0.9",
     "github-markdown-css": "^5.8.0",
     "marked": "^15.0.2",
+    "ollama-ai-provider": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "turndown": "^7.2.0",
@@ -65,6 +73,7 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.11.1",
-    "zip-webpack-plugin": "^4.0.1"
+    "zip-webpack-plugin": "^4.0.1",
+    "dotenv": "^16.4.5"
   }
 }
