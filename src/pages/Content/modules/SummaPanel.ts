@@ -3,7 +3,7 @@ import htmlTemplate from './SummaPanel.html';
 import { marked } from 'marked';
 import { icons } from '../../../lib/icons';
 import { ContentExtractor } from '../utils/ContentExtractor';
-import { DEFAULT_MODELS, LLMModel } from '../../../types/llm';
+import { DEFAULT_MODELS, LLMModel } from '../../../types/provider';
 import { ModelMenu } from './ModelMenu';
 
 // 进度状态 
