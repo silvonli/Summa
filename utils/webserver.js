@@ -30,7 +30,7 @@ var compiler = webpack(config);
 var server = new WebpackDevServer(
   {
     https: false,
-    hot: false,
+    hot: true,
     liveReload: false,
     client: {
       webSocketTransport: 'ws',

@@ -68,24 +68,10 @@ var options = {
         ],
         include: path.resolve(__dirname, 'src/pages/Content'),
       },
+
       {
-        // look for .css or .scss files
-        test: /\.(css|scss)$/,
-        // in the `src` directory
-        use: [
-          {
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-        ],
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
         exclude: path.resolve(__dirname, 'src/pages/Content'),
       },
       {
