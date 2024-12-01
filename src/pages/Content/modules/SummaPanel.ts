@@ -3,8 +3,9 @@ import htmlTemplate from './SummaPanel.html';
 import { marked } from 'marked';
 import { icons } from '../../../lib/icons';
 import { ContentExtractor } from '../utils/ContentExtractor';
-import { DEFAULT_MODELS, LLMModel } from '../../../types/provider';
+import { LLMModel } from '../../../types/provider';
 import { ModelMenu } from './ModelMenu';
+import { StorageService } from '../../../services/storage';
 
 // 进度状态 
 enum ProcessStatus {
@@ -21,8 +22,8 @@ class SummaPanel {
   private summary: string;
   private currentUrl: string;
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
-  private modelMenu: ModelMenu | null = null;
-  private currentModel: LLMModel = DEFAULT_MODELS[0];
+  private currentModel: LLMModel | null = null;
+  private modelList: LLMModel[] = [];
 
   constructor() {
     this.hostNode = null;
@@ -34,9 +35,42 @@ class SummaPanel {
     this.mouseEventHandler = null;
   }
 
-  init(): void {
+  async init(): Promise<void> {
+    // 预先加载模型列表
+    this.modelList = await StorageService.getModelList();
+
+    // 初始化当前模型
+    await this.initializeCurrentModel();
+
     // 监听来自 background 的消息
     chrome.runtime.onMessage.addListener(this.handleMessages.bind(this));
+  }
+
+  // 初始化当前模型
+  private async initializeCurrentModel(): Promise<void> {
+    // 如果模型列表为空则直接返回
+    if (this.modelList.length === 0) return;
+
+    const savedModel = await StorageService.getCurrentModel();
+    // 如果没有保存的模型,使用第一个模型
+    if (!savedModel) {
+      this.currentModel = this.modelList[0];
+      StorageService.saveCurrentModel(this.currentModel);
+      return;
+    }
+
+    // 检查保存的模型是否在当前列表中
+    const modelExists = this.modelList.some(model =>
+      model.id === savedModel.id &&
+      model.provider === savedModel.provider
+    );
+
+    if (modelExists) {
+      this.currentModel = savedModel;
+    } else {
+      this.currentModel = this.modelList[0];
+      StorageService.saveCurrentModel(this.currentModel);
+    }
   }
 
   private handleMessages(
@@ -251,15 +285,15 @@ class SummaPanel {
     });
   }
 
-  private getModelMenu(): ModelMenu {
-    if (!this.modelMenu && this.shadowRoot) {
-      this.modelMenu = new ModelMenu(
-        this.shadowRoot,
-        DEFAULT_MODELS,
-        this.onModelSelect.bind(this)
-      );
+  private createModelMenu(): ModelMenu {
+    if (!this.shadowRoot) {
+      throw new Error('Shadow root is not initialized');
     }
-    return this.modelMenu!;
+    return new ModelMenu(
+      this.shadowRoot,
+      this.modelList,
+      this.onModelSelect.bind(this)
+    );
   }
 
   // remove 方法
@@ -276,8 +310,6 @@ class SummaPanel {
       this.content = '';
       this.summary = '';
     }
-
-    this.modelMenu = null;
   }
 
   private bindEvents(): void {
@@ -291,13 +323,8 @@ class SummaPanel {
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
     refreshBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
-      const menu = this.getModelMenu();
-
-      if (menu.isVisible()) {
-        menu.hide();
-      } else {
-        menu.show(e.currentTarget as HTMLElement);
-      }
+      const menu = this.createModelMenu();
+      menu.show(e.currentTarget as HTMLElement);
     });
 
     // 关闭按钮
@@ -340,6 +367,7 @@ class SummaPanel {
   private onModelSelect(model: LLMModel): void {
     this.currentModel = model;
     this.processContent();
+    StorageService.saveCurrentModel(model);
   }
 
   private onClose(): void {
