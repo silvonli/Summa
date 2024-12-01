@@ -8,25 +8,30 @@ import { AddModelDialog } from './AddModelDialog'
 
 interface ProviderConfigProps {
   provider: LLMProvider
-  onUpdate: (provider: LLMProvider) => void
+  onProviderUpdate: (provider: LLMProvider) => void
 }
 
 export const ProviderConfig: React.FC<ProviderConfigProps> = ({
   provider,
-  onUpdate,
+  onProviderUpdate,
 }) => {
   const handleConfigChange = (field: keyof LLMProvider, value: string | boolean) => {
-    onUpdate({
+    onProviderUpdate({
       ...provider,
       [field]: value
     })
   }
 
   const handleModelsChange = (models: LLMModel[]) => {
-    onUpdate({
+    onProviderUpdate({
       ...provider,
       models
     })
+  }
+
+  const handleDeleteModel = (modelId: string) => {
+    const updatedModels = provider.models.filter((model) => model.id !== modelId)
+    handleModelsChange(updatedModels)
   }
 
   return (
@@ -69,7 +74,9 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
         )}
 
         <div className="space-y-2">
-          <Label>可用模型</Label>
+          {provider.models.length > 0 && (
+            <Label>可用模型</Label>
+          )}
           <div className="grid gap-2">
             {provider.models.map((model) => (
               <div
@@ -77,7 +84,12 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
                 className="flex items-center justify-between p-2 border rounded-lg"
               >
                 <span>{model.name}</span>
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteModel(model.id)}
+                  aria-label={`删除模型 ${model.name}`}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"

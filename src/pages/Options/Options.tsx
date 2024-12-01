@@ -86,7 +86,7 @@ const Options: React.FC = () => {
       <div className="flex-1 overflow-auto">
         <ProviderConfig
           provider={savedProvider || selectedProvider}
-          onUpdate={handleProviderUpdate}
+          onProviderUpdate={handleProviderUpdate}
         />
       </div>
     </div>
