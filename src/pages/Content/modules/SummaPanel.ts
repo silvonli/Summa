@@ -11,7 +11,8 @@ import { StorageService } from '../../../services/storage';
 enum ProcessStatus {
   EXTRACTING = 0,
   SUMMARIZING = 1,
-  PARSING = 2
+  PARSING = 2,
+  NO_MODEL = 3
 }
 
 class SummaPanel {
@@ -98,6 +99,17 @@ class SummaPanel {
       { status: ProcessStatus.SUMMARIZING, text: '正在总结内容...' },
       { status: ProcessStatus.PARSING, text: '正在解析总结文本...' },
     ];
+
+    // 如果是 NO_MODEL 状态，显示特殊提示
+    if (newStatus === ProcessStatus.NO_MODEL) {
+      progress.innerHTML = `
+        <div class="no-model-tip">
+          <span class="icon">${icons.warning}</span>
+          <span class="message">请先在设置中配置模型</span>
+        </div>
+      `;
+      return;
+    }
 
     // 根据当前状态更新UI
     const currentStep = steps.find(step => step.status === newStatus);
@@ -189,6 +201,12 @@ class SummaPanel {
   private async processContent(shouldExtract = false): Promise<void> {
     // 显示进度条
     this.switchContentVisibility(true);
+
+    // 检查是否有可用的模型
+    if (!this.currentModel) {
+      this.updateProcess(ProcessStatus.NO_MODEL);
+      return;
+    }
 
     if (shouldExtract) {
       this.updateProcess(ProcessStatus.EXTRACTING);
@@ -366,8 +384,8 @@ class SummaPanel {
 
   private onModelSelect(model: LLMModel): void {
     this.currentModel = model;
-    this.processContent();
     StorageService.saveCurrentModel(model);
+    this.processContent(false);
   }
 
   private onClose(): void {

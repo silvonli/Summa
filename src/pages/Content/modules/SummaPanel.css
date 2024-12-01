@@ -181,3 +181,25 @@
 .copy-btn.copied .copied-icon {
   display: block;
 }
+
+.no-model-tip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--summa-error-alpha);
+  border-radius: var(--radius-md);
+  background-color: var(--summa-error-bg);
+  color: var(--summa-error);
+}
+
+.no-model-tip .warning-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.no-model-tip .message {
+  font-size: 14px;
+  line-height: 1.5;
+}
