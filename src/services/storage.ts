@@ -1,4 +1,4 @@
-import { LLMProvider, LLMModel } from '../types/provider';
+import { LLMProvider, LLMModel } from './provider';
 
 export class StorageService {
   private static PROVIDERS_KEY = 'llm_providers';

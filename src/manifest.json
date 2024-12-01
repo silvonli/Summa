@@ -8,7 +8,7 @@
   ],
   "options_page": "options.html",
   "background": {
-    "service_worker": "background.bundle.js"
+    "service_worker": "background.bundle.js",
   },
   "action": {
     "default_icon": "icon-34.png"

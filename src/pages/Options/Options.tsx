@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { createRoot } from 'react-dom/client';
-import { LLMProvider, DEFAULT_PROVIDERS } from "../../types/provider"
+import { LLMProvider, DEFAULT_PROVIDERS } from "../../services/provider"
 import { StorageService } from "../../services/storage"
 import "../../globals.css"
 import { ProviderConfig } from "./modules/ProviderConfig"
@@ -19,8 +19,7 @@ const PROVIDER_ICONS: Record<string, string> = {
   OPENROUTER: "🔧",
   DEEPSEEK: "🔍",
   MISTRAL: "🌟",
-  OPENAI_LIKE: "🤖",
-  AZURE_OPENAI: "☁️",
+  OPENAI_LIKE: "☁️",
   LMSTUDIO: "🔬",
   OLLAMA: "🐪"
 }

@@ -129,31 +129,32 @@ export function getModel(provider: string, model: string, apiKeys?: Record<strin
   const baseURL = getBaseURL(provider, baseURLs);
 
   switch (provider) {
-    case 'Anthropic':
+    case 'ANTHROPIC':
       return getAnthropicModel(apiKey, model);
-    case 'OpenAI':
+    case 'OPENAI':
       return getOpenAIModel(apiKey, model);
-    case 'Groq':
+    case 'GROQ':
       return getGroqModel(apiKey, model);
-    case 'HuggingFace':
-      return getHuggingFaceModel(apiKey, model);
-    case 'OpenRouter':
+    case 'OPENROUTER':
       return getOpenRouterModel(apiKey, model);
-    case 'Google':
+    case 'GOOGLE':
       return getGoogleModel(apiKey, model);
-    case 'OpenAILike':
+    case 'OPENAI_LIKE':
       return getOpenAILikeModel(baseURL, apiKey, model);
-    case 'Deepseek':
+    case 'DEEPSEEK':
       return getDeepseekModel(apiKey, model);
-    case 'Mistral':
+    case 'MISTRAL':
       return getMistralModel(apiKey, model);
-    case 'LMStudio':
+    case 'LMSTUDIO':
       return getLMStudioModel(baseURL, model);
+    case 'OLLAMA':
+      return getOllamaModel(baseURL, model);
+    // 以下没有提供商没有在设置页面提供
     case 'xAI':
       return getXAIModel(apiKey, model);
     case 'Cohere':
       return getCohereAIModel(apiKey, model);
-    default:
-      return getOllamaModel(baseURL, model);
+    case 'HuggingFace':
+      return getHuggingFaceModel(apiKey, model);
   }
 }

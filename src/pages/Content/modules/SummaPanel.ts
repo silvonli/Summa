@@ -3,7 +3,7 @@ import htmlTemplate from './SummaPanel.html';
 import { marked } from 'marked';
 import { icons } from '../../../lib/icons';
 import { ContentExtractor } from '../utils/ContentExtractor';
-import { LLMModel } from '../../../types/provider';
+import { LLMModel } from '../../../services/provider';
 import { ModelMenu } from './ModelMenu';
 import { StorageService } from '../../../services/storage';
 
@@ -240,11 +240,30 @@ class SummaPanel {
 
   // 总结内容
   private async summarizeContent(): Promise<void> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // 使用当前模型 this.currentModel总结内容 todo
-    const summary = this.content;
-    this.summary = summary;
-    summaDebugLog('summary', this.summary);
+    if (!this.currentModel || !this.content) return;
+
+    try {
+      // 发送消息给 background 进行内容总结
+      const response = await chrome.runtime.sendMessage({
+        action: 'summarize',
+        data: {
+          model: this.currentModel,
+          content: this.content,
+          url: this.currentUrl
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      this.summary = response.summary;
+      summaDebugLog('获取到总结内容:', this.summary);
+    } catch (error) {
+      console.error('总结内容失败:', error as Error);
+      // 设置错误提示信息 
+      this.summary = `### 总结失败\n\n发生错误: ${(error as Error).message}`;
+    }
   }
 
   // 解析总结

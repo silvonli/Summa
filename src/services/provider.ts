@@ -155,22 +155,6 @@ export const DEFAULT_PROVIDERS: LLMProvider[] = [
     models: [],
   },
   {
-    id: 'AZURE_OPENAI',
-    name: 'Azure OpenAI',
-    models: [
-      {
-        id: 'gpt-4o',
-        provider: 'AZURE_OPENAI',
-        name: ' GPT-4o'
-      },
-      {
-        id: 'gpt-4o-mini',
-        provider: 'AZURE_OPENAI',
-        name: ' GPT-4o-mini'
-      }
-    ],
-  },
-  {
     id: 'LMSTUDIO',
     name: 'LMStudio',
     apiHost: 'http://localhost:1234',
