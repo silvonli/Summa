@@ -50,7 +50,6 @@ export const AddModelDialog: React.FC<AddModelDialogProps> = ({
     setModelId("")
     setModelName("")
     setOpen(false)
-
   }
 
   return (

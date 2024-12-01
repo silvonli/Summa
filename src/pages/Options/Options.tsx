@@ -25,13 +25,12 @@ const PROVIDER_ICONS: Record<string, string> = {
   OLLAMA: "🐪"
 }
 
-// 使用默认提供商初始化 PROVIDER_ITEMS
+// 使用默认提供商列表初始化 PROVIDER_ITEMS
 const PROVIDER_ITEMS: ProviderItem[] = DEFAULT_PROVIDERS.map(provider => ({
   ...provider,
   icon: PROVIDER_ICONS[provider.id] || "🔧", // 使用默认图标作为后备
   enable: false,
 }))
-
 
 
 const Options: React.FC = () => {
