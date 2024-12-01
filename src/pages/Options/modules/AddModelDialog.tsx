@@ -1,4 +1,3 @@
-
 import React from "react"
 import { useState } from "react"
 import {
@@ -12,18 +11,46 @@ import { Label } from "../../../components/ui/label"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
 import { Plus } from "lucide-react"
+import { LLMProvider, LLMModel } from '../../../types/provider'
 
+interface AddModelDialogProps {
+  provider: LLMProvider
+  onModelsUpdate: (models: LLMModel[]) => void
+}
 
-// 添加模型表单组件
-export const AddModelDialog: React.FC = () => {
+export const AddModelDialog: React.FC<AddModelDialogProps> = ({
+  provider,
+  onModelsUpdate,
+}) => {
   const [open, setOpen] = useState(false)
   const [modelId, setModelId] = useState("")
   const [modelName, setModelName] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: 处理模型添加逻辑
+
+    // 验证模型ID是否已存在
+    if (provider.models.some(model => model.id === modelId)) {
+      alert("模型ID已存在")
+      return
+    }
+
+    // 创建新模型对象
+    const newModel: LLMModel = {
+      id: modelId,
+      name: modelName || modelId, // 如果没有输入名称，使用ID作为名称
+      provider: provider.id,
+    }
+
+    // 更新模型列表
+    const updatedModels = [...provider.models, newModel]
+    onModelsUpdate(updatedModels)
+
+    // 重置表单并关闭对话框
+    setModelId("")
+    setModelName("")
     setOpen(false)
+
   }
 
   return (
@@ -31,7 +58,7 @@ export const AddModelDialog: React.FC = () => {
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Plus className="w-4 h-4" />
-          添加
+          添加模型
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -47,7 +74,7 @@ export const AddModelDialog: React.FC = () => {
               id="modelId"
               placeholder="必填 例如 gpt-3.5-turbo"
               value={modelId}
-              onChange={(e) => setModelId(e.target.value)}
+              onChange={(e) => setModelId(e.target.value.trim())}
               required
             />
           </div>
@@ -57,7 +84,7 @@ export const AddModelDialog: React.FC = () => {
               id="modelName"
               placeholder="例如 GPT-3.5"
               value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
+              onChange={(e) => setModelName(e.target.value.trim())}
             />
           </div>
           <Button type="submit" className="w-full">

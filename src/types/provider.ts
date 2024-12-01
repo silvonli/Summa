@@ -7,6 +7,7 @@ export type LLMProvider = {
   apiKey?: string;
   apiHost?: string;
   models: LLMModel[];
+  enable?: boolean;
 }
 
 /**

@@ -8,7 +8,6 @@ import { ProviderConfig } from "./modules/ProviderConfig"
 // 使用 LLMProvider 类型并扩展它
 type ProviderItem = LLMProvider & {
   icon: string
-  active?: boolean
 }
 
 // 定义图标映射
@@ -17,21 +16,20 @@ const PROVIDER_ICONS: Record<string, string> = {
   OPENAI: "🧠",
   GOOGLE: "🌐",
   GROQ: "⚡",
-  HUGGINGFACE: "🤗",
-  OPENROUTER: "✨",
+  OPENROUTER: "🔧",
   DEEPSEEK: "🔍",
   MISTRAL: "🌟",
   OPENAI_LIKE: "🤖",
-  AZURE: "☁️",
+  AZURE_OPENAI: "☁️",
   LMSTUDIO: "🔬",
   OLLAMA: "🐪"
 }
 
-// 使用 PROVIDERS_LIST 初始化 PROVIDER_ITEMS
+// 使用默认提供商初始化 PROVIDER_ITEMS
 const PROVIDER_ITEMS: ProviderItem[] = DEFAULT_PROVIDERS.map(provider => ({
   ...provider,
   icon: PROVIDER_ICONS[provider.id] || "🔧", // 使用默认图标作为后备
-  active: false
+  enable: false,
 }))
 
 
