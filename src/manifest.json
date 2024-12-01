@@ -3,7 +3,8 @@
   "name": "Summa",
   "description": "文章总结插件",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "options_page": "options.html",
   "background": {

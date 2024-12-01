@@ -1,6 +1,7 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { createRoot } from 'react-dom/client';
 import { LLMProvider, DEFAULT_PROVIDERS } from "../../types/provider"
+import { StorageService } from "../../services/storage"
 import "../../globals.css"
 import { ProviderConfig } from "./modules/ProviderConfig"
 
@@ -8,7 +9,6 @@ import { ProviderConfig } from "./modules/ProviderConfig"
 type ProviderItem = LLMProvider & {
   icon: string
   active?: boolean
-  baseUrl?: boolean
 }
 
 // 定义图标映射
@@ -31,19 +31,35 @@ const PROVIDER_ICONS: Record<string, string> = {
 const PROVIDER_ITEMS: ProviderItem[] = DEFAULT_PROVIDERS.map(provider => ({
   ...provider,
   icon: PROVIDER_ICONS[provider.id] || "🔧", // 使用默认图标作为后备
-  baseUrl: ["LMSTUDIO", "OLLAMA", "OPENAI_LIKE"].includes(provider.id),
   active: false
 }))
 
 
 
 const Options: React.FC = () => {
-  // 添加状态管理当前选中的服务
-  const [selectedProvider, setSelectedProvider] = useState<LLMProvider>(DEFAULT_PROVIDERS[0])
+  const [providers, setProviders] = useState<ProviderItem[]>(PROVIDER_ITEMS)
+  const [selectedProvider, setSelectedProvider] = useState<LLMProvider>(providers[0])
+  const [savedProvider, setSavedProvider] = useState<LLMProvider | null>(null)
 
-  const handleProviderSelect = (provider: LLMProvider) => {
-    setSelectedProvider(provider)
-  }
+  // 初始化时加载保存的数据
+  useEffect(() => {
+    const loadSavedProvider = async () => {
+      const savedData = await StorageService.getProvider(selectedProvider.id);
+      setSavedProvider(savedData);
+    };
+    loadSavedProvider();
+  }, [selectedProvider.id]);
+
+  const handleProviderSelect = async (provider: LLMProvider) => {
+    setSelectedProvider(provider);
+    const savedData = await StorageService.getProvider(provider.id);
+    setSavedProvider(savedData);
+  };
+
+  const handleProviderUpdate = async (updatedProvider: LLMProvider) => {
+    await StorageService.saveProvider(updatedProvider);
+    setSavedProvider(updatedProvider);
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -53,7 +69,7 @@ const Options: React.FC = () => {
           <span className="text-base font-medium">模型服务提供商</span>
         </div>
         <nav className="p-2 space-y-1">
-          {PROVIDER_ITEMS.map((item) => (
+          {providers.map((item) => (
             <button
               key={item.id}
               onClick={() => handleProviderSelect(item)}
@@ -64,7 +80,6 @@ const Options: React.FC = () => {
                 {item.icon}
               </span>
               <span className="text-sm">{item.name}</span>
-
             </button>
           ))}
         </nav>
@@ -72,7 +87,10 @@ const Options: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <ProviderConfig provider={selectedProvider} />
+        <ProviderConfig
+          provider={savedProvider || selectedProvider}
+          onUpdate={handleProviderUpdate}
+        />
       </div>
     </div>
   )

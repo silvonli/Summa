@@ -1,95 +1,111 @@
-import React from "react"
-import { Button } from "../../../components/ui/button"
-import { Input } from "../../../components/ui/input"
-import { Switch } from "../../../components/ui/switch"
-import { AddModelDialog } from "./AddModelDialog"
-import { LLMProvider } from "../../../types/provider"
+import React, { useState, useEffect } from 'react'
+import { LLMProvider } from '../../../types/provider'
+import { Label } from '../../../components/ui/label'
+import { Input } from '../../../components/ui/input'
+import { Button } from '../../../components/ui/button'
+import { Switch } from '../../../components/ui/switch'
+import { AddModelDialog } from './AddModelDialog'
 
-// 在 PROVIDER_ITEMS 定义后添加这个辅助函数
-const getProviderConfigSections = (providerId: string) => {
-  return {
-    showApiKey: !["LMSTUDIO", "OLLAMA"].includes(providerId),
-    showEndpoint: ["OPENAI_LIKE", "LMSTUDIO", "OLLAMA"].includes(providerId)
-  }
+interface ProviderConfigProps {
+  provider: LLMProvider
+  onUpdate: (provider: LLMProvider) => void
 }
 
-// 创建通用的服务配置组件
-export const ProviderConfig: React.FC<{ provider: LLMProvider }> = ({ provider }) => {
-  const { showApiKey, showEndpoint } = getProviderConfigSections(provider.id)
+export const ProviderConfig: React.FC<ProviderConfigProps> = ({
+  provider,
+  onUpdate,
+}) => {
+  const [config, setConfig] = useState<LLMProvider>(provider)
+
+  // 当provider改变时更新本地状态
+  useEffect(() => {
+    setConfig(provider)
+  }, [provider])
+
+  const handleInputChange = (field: keyof LLMProvider, value: string) => {
+    setConfig(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleSave = () => {
+    onUpdate(config)
+  }
 
   return (
-    <div className="p-6 max-w-4xl">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          {provider.name}
-        </h1>
-        <Switch />
+    <div className="p-6 space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">{config.name} 配置</h2>
+          <Switch />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          配置 {config.name} 的连接信息和可用模型
+        </p>
+
       </div>
 
-      {/* API Key Section */}
-      {showApiKey && (
-        <div className="space-y-4 mb-8">
-          <h2 className="text-lg font-medium">API 密钥</h2>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="API 密钥"
-              className="font-mono"
-            />
-
-          </div>
-        </div>
-      )}
-
-      {/* API Endpoint Section */}
-      {showEndpoint && (
-        <div className="space-y-4 mb-8">
-          <h2 className="text-lg font-medium">API 地址</h2>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="apiKey">API 密钥</Label>
           <Input
-            type="url"
-            defaultValue={provider.apiHost}
-            className="font-mono"
+            id="apiKey"
+            value={config.apiKey || ''}
+            onChange={(e) => handleInputChange('apiKey', e.target.value)}
+            placeholder="输入 API Key"
           />
         </div>
-      )}
 
-      {/* Models Section */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-medium">模型</h2>
+        {config.apiHost !== undefined && (
+          <div className="space-y-2">
+            <Label htmlFor="apiHost">API 地址</Label>
+            <Input
+              id="apiHost"
+              value={config.apiHost || ''}
+              onChange={(e) => handleInputChange('apiHost', e.target.value)}
+              placeholder="输入 API Host"
+            />
+          </div>
+        )}
+
         <div className="space-y-2">
-
-          {provider.models.map((model) => (
-            <div
-              key={model.id}
-              className="flex items-center justify-between p-2 rounded-lg border bg-card text-card-foreground"
-            >
-              <div className="flex items-center gap-2 text-sm">
-                {model.name}
+          <Label>可用模型</Label>
+          <div className="grid gap-2">
+            {config.models.map((model) => (
+              <div
+                key={model.id}
+                className="flex items-center justify-between p-2 border rounded-lg"
+              >
+                <span>{model.name}</span>
+                <Button variant="ghost" size="icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                  </svg>
+                </Button>
               </div>
-              <Button variant="ghost" size="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="4" y1="12" x2="20" y2="12" />
-                </svg>
-              </Button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
+        {/* <Button onClick={handleSave} className="mt-4">
+          保存配置
+        </Button> */}
 
-      {/* Action Buttons */}
-      <div className="mt-4 flex gap-2">
-        <AddModelDialog />
+        <div className="mt-4 flex gap-2">
+          <AddModelDialog />
+        </div>
+
       </div>
     </div>
   )
