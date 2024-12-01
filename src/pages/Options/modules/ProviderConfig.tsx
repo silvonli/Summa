@@ -81,7 +81,7 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
             {provider.models.map((model) => (
               <div
                 key={model.id}
-                className="flex items-center justify-between p-2 border rounded-lg"
+                className="flex items-center justify-between px-4 py-1 border rounded-lg text-sm text-muted-foreground"
               >
                 <span>{model.name}</span>
                 <Button

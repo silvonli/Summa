@@ -35,27 +35,27 @@ const PROVIDER_ITEMS: ProviderItem[] = DEFAULT_PROVIDERS.map(provider => ({
 
 const Options: React.FC = () => {
   const [providers, setProviders] = useState<ProviderItem[]>(PROVIDER_ITEMS)
-  const [selectedProvider, setSelectedProvider] = useState<LLMProvider>(providers[0])
-  const [savedProvider, setSavedProvider] = useState<LLMProvider | null>(null)
+  const [activeProvider, setActiveProvider] = useState<LLMProvider>(providers[0])
+  const [providerSettings, setProviderSettings] = useState<LLMProvider | null>(null)
 
   // 初始化时加载保存的数据
   useEffect(() => {
-    const loadSavedProvider = async () => {
-      const savedData = await StorageService.getProvider(selectedProvider.id);
-      setSavedProvider(savedData);
+    const loadProviderSettings = async () => {
+      const savedData = await StorageService.getProvider(activeProvider.id);
+      setProviderSettings(savedData);
     };
-    loadSavedProvider();
-  }, [selectedProvider.id]);
+    loadProviderSettings();
+  }, [activeProvider.id]);
 
   const handleProviderSelect = async (provider: LLMProvider) => {
-    setSelectedProvider(provider);
+    setActiveProvider(provider);
     const savedData = await StorageService.getProvider(provider.id);
-    setSavedProvider(savedData);
+    setProviderSettings(savedData);
   };
 
   const handleProviderUpdate = async (updatedProvider: LLMProvider) => {
     await StorageService.saveProvider(updatedProvider);
-    setSavedProvider(updatedProvider);
+    setProviderSettings(updatedProvider);
   };
 
   return (
@@ -70,7 +70,7 @@ const Options: React.FC = () => {
             <button
               key={item.id}
               onClick={() => handleProviderSelect(item)}
-              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${selectedProvider.id === item.id ? "bg-secondary" : "hover:bg-secondary/80"
+              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeProvider.id === item.id ? "bg-secondary" : "hover:bg-secondary/80"
                 }`}
             >
               <span className="w-5 h-5 flex items-center justify-center">
@@ -85,7 +85,7 @@ const Options: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <ProviderConfig
-          provider={savedProvider || selectedProvider}
+          provider={providerSettings || activeProvider}
           onProviderUpdate={handleProviderUpdate}
         />
       </div>
