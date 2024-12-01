@@ -303,16 +303,6 @@ class SummaPanel {
     });
   }
 
-  private createModelMenu(): ModelMenu {
-    if (!this.shadowRoot) {
-      throw new Error('Shadow root is not initialized');
-    }
-    return new ModelMenu(
-      this.shadowRoot,
-      this.modelList,
-      this.onModelSelect.bind(this)
-    );
-  }
 
   // remove 方法
   private remove(): void {
@@ -339,11 +329,7 @@ class SummaPanel {
 
     // 刷新按钮
     const refreshBtn = this.shadowRoot.querySelector('.refresh-btn');
-    refreshBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const menu = this.createModelMenu();
-      menu.show(e.currentTarget as HTMLElement);
-    });
+    refreshBtn?.addEventListener('click', (e: Event) => this.onRefresh(e as MouseEvent));
 
     // 关闭按钮
     const closeBtn = this.shadowRoot.querySelector('.close-btn');
@@ -354,9 +340,22 @@ class SummaPanel {
     settingsBtn?.addEventListener('click', () => this.onSettings());
   }
 
+  private onRefresh(event: MouseEvent): void {
+    if (!this.shadowRoot) return;
+    if (this.modelList.length === 0) return;
+    event.stopPropagation();
+    const menu = new ModelMenu(
+      this.shadowRoot,
+      this.modelList,
+      this.onModelSelect.bind(this)
+    );
+
+    menu.show(event.currentTarget as HTMLElement);
+  }
 
   private onCopy(): void {
     if (!this.shadowRoot) return;
+    if (this.summary.trim() === '') return;
 
     const markdownBody = this.shadowRoot.querySelector('.markdown-body');
     if (!markdownBody) return;
