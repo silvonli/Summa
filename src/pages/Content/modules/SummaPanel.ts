@@ -23,6 +23,7 @@ class SummaPanel {
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
   private currentModel: LLMModel | null = null;
   private modelList: LLMModel[] = [];
+  private currentMenu: ModelMenu | null = null;
 
   constructor() {
     this.hostNode = null;
@@ -88,29 +89,40 @@ class SummaPanel {
     if (!this.shadowRoot) return;
 
     const progress = this.shadowRoot.querySelector('.progress');
-
     if (!progress) return;
 
-    // 定义各状态对应的步骤显示
     const steps = [
-      { status: ProcessStatus.EXTRACTING, text: '正在提取内容...' },
-      { status: ProcessStatus.SUMMARIZING, text: '正在总结内容...' },
-      { status: ProcessStatus.PARSING, text: '正在解析总结文本...' },
+      {
+        status: ProcessStatus.EXTRACTING,
+        pending: '正在提取内容...',
+        completed: '内容提取完成'
+      },
+      {
+        status: ProcessStatus.SUMMARIZING,
+        pending: '正在总结内容...',
+        completed: '内容总结完成'
+      },
+      {
+        status: ProcessStatus.PARSING,
+        pending: '正在解析总结文本...',
+        completed: '解析完成'
+      },
     ];
 
-    // 根据当前状态更新UI
-    const currentStep = steps.find(step => step.status === newStatus);
-    if (!currentStep) return;
-
-    const getStepHtml = (step: { status: ProcessStatus; text: string }) => {
+    const getStepHtml = (step: {
+      status: ProcessStatus;
+      pending: string;
+      completed: string;
+    }) => {
       const isPending = step.status >= newStatus;
       const icon = isPending ? icons.spinner : icons.check;
       const stepClass = isPending ? 'step pending' : 'step';
+      const text = isPending ? step.pending : step.completed;
 
       return `
         <div class="${stepClass}">
           <span>${icon}</span>
-          ${step.text}
+          ${text}
         </div>
       `;
     };
@@ -349,16 +361,24 @@ class SummaPanel {
   }
 
   private onRefresh(event: MouseEvent): void {
-    if (!this.shadowRoot) return;
-    if (this.modelList.length === 0) return;
-    event.stopPropagation();
-    const menu = new ModelMenu(
-      this.shadowRoot,
-      this.modelList,
-      this.onModelSelect.bind(this)
-    );
+    if (!this.shadowRoot || this.modelList.length === 0) return;
 
-    menu.show(event.currentTarget as HTMLElement);
+    event.stopPropagation();
+
+    // 如果菜单不存在,创建新菜单
+    if (!this.currentMenu) {
+      this.currentMenu = new ModelMenu(
+        this.shadowRoot,
+        this.modelList,
+        this.onModelSelect.bind(this)
+      );
+    }
+
+    // 切换菜单显示状态
+    const targetElement = event.currentTarget as HTMLElement;
+    this.currentMenu.isVisible()
+      ? this.currentMenu.hide()
+      : this.currentMenu.show(targetElement);
   }
 
   private onCopy(): void {
