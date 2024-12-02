@@ -326,18 +326,21 @@ class SummaPanel {
 
   // remove 方法
   private remove(): void {
+    // 清理全局事件监听器
     if (this.mouseEventHandler) {
       document.removeEventListener('mousedown', this.mouseEventHandler);
       this.mouseEventHandler = null;
     }
 
+    // 移除 DOM 节点
     if (this.hostNode) {
       this.hostNode.remove();
-      this.hostNode = null;
-      this.shadowRoot = null;
-      this.content = '';
-      this.summary = '';
     }
+
+    // 重置关键状态
+    this.hostNode = null;
+    this.shadowRoot = null;
+    this.isShow = false;
   }
 
   private bindEvents(): void {
