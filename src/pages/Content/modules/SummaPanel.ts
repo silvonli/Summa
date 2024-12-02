@@ -6,7 +6,6 @@ import { ContentExtractor } from '../utils/ContentExtractor';
 import { LLMModel } from '../../../services/provider';
 import { ModelMenu } from './ModelMenu';
 import { StorageService } from '../../../services/storage';
-
 // 进度状态 
 enum ProcessStatus {
   EXTRACTING = 0,
@@ -233,7 +232,6 @@ class SummaPanel {
     }
 
     try {
-      // 发送消息给 background 进行内容总结
       const response = await chrome.runtime.sendMessage({
         action: 'summarize',
         data: {
@@ -246,11 +244,11 @@ class SummaPanel {
       if (response.error) {
         this.summary = `### 错误\n\n总结时发生错误: ${response.error}`;
       } else {
-        this.summary = response.summary || '### 错误\n\大语言模型返回的总结为空';
+        this.summary = response.data.text || '### 错误\n\大语言模型返回的总结为空';
       }
     } catch (error) {
-      summaDebugLog('总结时发生错误:', error);
-      this.summary = `### 错误\n\n总结时发生错误: ${(error as Error).message}`;
+      summaDebugLog('总结时发生错误:', error as Error);
+      this.summary = `### 错误\n\n总结时发生错误: ${error as Error}`;
     }
   }
 
