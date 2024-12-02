@@ -2,25 +2,26 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 400px;
+  width: 420px;
   height: 80vh;
   background-color: var(--summa-white);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   border: 1px solid var(--summa-border);
   box-shadow: var(--summa-shadow);
   z-index: 2147483646;
   overflow: hidden;
+  backdrop-filter: blur(20px);
 
-  /* 过渡动画属性 */
+  /* 优化动画效果 */
   opacity: 1;
+  /* transform: translateY(0); */
   transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .panel.hidden {
-  display: block !important;
-  /* 确保隐藏状态下不可交互 */
-  pointer-events: none;
   opacity: 0;
+  /* transform: translateY(-20px); */
+  pointer-events: none;
 }
 
 .header {
@@ -28,14 +29,15 @@
   height: var(--header-height);
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-bottom: 1px solid var(--summa-border);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
 }
 
 .content {
   height: calc(80vh - var(--header-height));
   padding: var(--spacing-lg);
-  /* 滚动行为 */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -47,7 +49,6 @@
   min-height: 100%;
 }
 
-/* Webkit 滚动条样式 */
 .content::-webkit-scrollbar {
   width: var(--scrollbar-width);
 }
@@ -59,6 +60,11 @@
 .content::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-color);
   border-radius: var(--scrollbar-radius);
+  transition: background-color 0.2s ease;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--summa-text-secondary);
 }
 
 .progress {
@@ -67,7 +73,8 @@
   border: 1px solid var(--summa-primary-alpha);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
-  background-color: var(--summa-white);
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
 }
 
 .steps {
@@ -81,6 +88,9 @@
   align-items: center;
   gap: var(--spacing-sm);
   color: var(--progress-text);
+  font-size: 14px;
+  line-height: 1.4;
+  transition: all 0.3s ease;
 }
 
 .step span {
@@ -145,23 +155,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   padding: var(--spacing-xs);
   border: none;
-  background: none;
+  background: transparent;
   border-radius: var(--button-radius);
   color: var(--button-icon-color);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .button:hover {
   background-color: var(--button-hover-bg);
+  color: var(--summa-primary);
+  transform: scale(1.05);
 }
 
 .button:active {
-  color: var(--button-active-color);
+  transform: scale(0.95);
 }
 
 .button .icon {
@@ -204,4 +216,20 @@
   line-height: 1.5;
 }
 
-/*  按照 Material Design 3 设计风格优化 xx 界面，同时提高设计美感以及交互性 todo: */
+.copy-btn.copied {
+  animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

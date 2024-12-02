@@ -1,43 +1,49 @@
 /* 确保自定义属性在 Shadow DOM 中可用 */
 :host {
-  /* Colors */
-  --summa-primary: #95c043;
-  --summa-primary-alpha: rgba(149, 192, 67, 0.3);
-  --summa-white: #ffffff;
-  --summa-border: #D1D5DB;
+  /* Colors - 使用更柔和的色调 */
+  --summa-primary: #007AFF;
+  --summa-primary-alpha: rgba(0, 122, 255, 0.1);
+  --summa-white: #FFFFFF;
+  --summa-border: #E5E5EA;
+  --summa-text: #1C1C1E;
+  --summa-text-secondary: #8E8E93;
 
-  /* Shadows */
-  --summa-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
+  /* Shadows - 更细腻的阴影效果 */
+  --summa-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
+    0 16px 24px rgba(0, 0, 0, 0.06);
 
-  --progress-text: #2d2d2d;
-  --progress-text-pending: #6b7280;
+  /* 进度条相关 */
+  --progress-text: var(--summa-text);
+  --progress-text-pending: var(--summa-text-secondary);
 
-  /* Spacing */
-  --spacing-xs: 6px;
-  --spacing-sm: 8px;
+  /* Spacing - 优化间距 */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
 
-  /* Border radius */
-  --radius-sm: 6px;
+  /* Border radius - 统一圆角 */
+  --radius-sm: 8px;
   --radius-md: 12px;
+  --radius-lg: 16px;
 
-  --header-height: 44px;
+  --header-height: 48px;
 
-  /* 滚动条相关变量 */
-  --scrollbar-width: 4px;
-  --scrollbar-color: #D1D5DB;
-  --scrollbar-radius: 2px;
+  /* 滚动条 */
+  --scrollbar-width: 6px;
+  --scrollbar-color: #E5E5EA;
+  --scrollbar-radius: 3px;
 
-  --button-radius: 4px;
-  --button-hover-bg: #f3f4f6;
-  --button-icon-color: #6b7280;
-  --button-active-color: #6b7280b8;
+  /* 按钮样式 */
+  --button-radius: 8px;
+  --button-hover-bg: var(--summa-primary-alpha);
+  --button-icon-color: var(--summa-text-secondary);
+  --button-active-color: var(--summa-primary);
 
-  --menu-radius: 12px;
-  --menu-item-radius: 6px;
-  --menu-item-hover-bg: #e5e7eb;
-  --menu-text: #2d2d2d;
-  --menu-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-
+  /* 菜单样式 */
+  --menu-radius: var(--radius-lg);
+  --menu-item-radius: var(--radius-sm);
+  --menu-item-hover-bg: var(--summa-primary-alpha);
+  --menu-text: var(--summa-text);
+  --menu-shadow: var(--summa-shadow);
 }
