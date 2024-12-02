@@ -1,5 +1,4 @@
 
-import { getAPIKey, getBaseURL } from './api-key';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
@@ -9,7 +8,7 @@ import { createMistral } from '@ai-sdk/mistral';
 import { createCohere } from '@ai-sdk/cohere';
 import type { LanguageModelV1 } from 'ai';
 
-export const DEFAULT_NUM_CTX = process.env.DEFAULT_NUM_CTX ? parseInt(process.env.DEFAULT_NUM_CTX, 10) : 32768;
+export const DEFAULT_NUM_CTX = 32768;
 
 type OptionalApiKey = string | undefined;
 
@@ -125,8 +124,8 @@ export function getXAIModel(apiKey: OptionalApiKey, model: string) {
 }
 
 export function getModel(provider: string, model: string, apiKeys?: Record<string, string>, baseURLs?: Record<string, string>) {
-  const apiKey = getAPIKey(provider, apiKeys);
-  const baseURL = getBaseURL(provider, baseURLs);
+  const apiKey = apiKeys?.[provider] ?? '';
+  const baseURL = baseURLs?.[provider] ?? '';
 
   switch (provider) {
     case 'ANTHROPIC':

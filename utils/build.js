@@ -3,8 +3,6 @@ process.env.BABEL_ENV = 'production';
 process.env.NODE_ENV = 'production';
 process.env.ASSET_PATH = '/';
 
-require('dotenv').config();
-
 var webpack = require('webpack'),
   path = require('path'),
   fs = require('fs'),
