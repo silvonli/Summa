@@ -14,13 +14,11 @@
 
   /* 优化动画效果 */
   opacity: 1;
-  /* transform: translateY(0); */
   transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .panel.hidden {
   opacity: 0;
-  /* transform: translateY(-20px); */
   pointer-events: none;
 }
 
@@ -90,7 +88,6 @@
   color: var(--progress-text);
   font-size: 14px;
   line-height: 1.4;
-  transition: all 0.3s ease;
 }
 
 .step span {
@@ -138,7 +135,7 @@
 }
 
 
-.hidden {
+.content-hidden {
   display: none !important;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -163,20 +160,25 @@
   border-radius: var(--button-radius);
   color: var(--button-icon-color);
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .button:hover {
   background-color: var(--button-hover-bg);
   color: var(--summa-primary);
-  transform: scale(1.05);
 }
 
 .button:active {
   transform: scale(0.95);
 }
 
-.button .icon {
+.button .icon-container {
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.button .icon-container svg {
   width: 24px;
   height: 24px;
 }
@@ -194,42 +196,23 @@
   display: block;
 }
 
-.no-model-tip {
+/* 刷新按钮特殊样式 */
+.refresh-btn {
+  min-width: 36px;
+  width: auto;
+  padding-right: var(--spacing-sm);
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-lg);
-  border: 1px solid var(--summa-error-alpha);
-  border-radius: var(--radius-md);
-  background-color: var(--summa-error-bg);
-  color: var(--summa-error);
+  gap: var(--spacing-xs);
 }
 
-.no-model-tip .warning-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.no-model-tip .message {
+.refresh-btn .model-name {
+  display: none;
   font-size: 14px;
-  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--button-icon-color);
 }
 
-.copy-btn.copied {
-  animation: pulse 0.3s ease;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.1);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+.refresh-btn:hover .model-name {
+  display: block;
 }

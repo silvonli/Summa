@@ -301,6 +301,7 @@ class SummaPanel {
 
       this.bindEvents();
       this.initializeIcons();
+      this.initModelNameDisplay();
     } catch (error) {
       summaDebugLog('注入失败:', error);
     }
@@ -309,18 +310,27 @@ class SummaPanel {
   private initializeIcons(): void {
     if (!this.shadowRoot) return;
 
-    // 查找所有带有 data-icon 属性的按钮
-    const iconButtons = this.shadowRoot.querySelectorAll('[data-icon]');
+    // 查找所有带有 data-icon 属性的元素
+    const iconContainers = this.shadowRoot.querySelectorAll('[data-icon]');
 
-    iconButtons.forEach(button => {
-      const iconNames = button.getAttribute('data-icon')?.split(',') || [];
+    iconContainers.forEach(container => {
+      const iconNames = container.getAttribute('data-icon')?.split(',') || [];
       iconNames.forEach(name => {
         const iconHtml = icons[name as keyof typeof icons];
         if (iconHtml) {
-          button.innerHTML += iconHtml;
+          container.innerHTML += iconHtml;
         }
       });
     });
+  }
+
+  private initModelNameDisplay(): void {
+    if (!this.shadowRoot) return;
+
+    const modelNameSpan = this.shadowRoot.querySelector<HTMLSpanElement>('.refresh-btn .model-name');
+    if (modelNameSpan) {
+      modelNameSpan.textContent = this.currentModel?.name ?? '未选择模型';
+    }
   }
 
 
@@ -414,6 +424,7 @@ class SummaPanel {
   private onModelSelect(model: LLMModel): void {
     this.currentModel = model;
     StorageService.saveCurrentModel(model);
+    this.initModelNameDisplay();
     this.processContent(false);
   }
 
@@ -433,8 +444,8 @@ class SummaPanel {
   private switchContentVisibility(showProgress: boolean): void {
     if (!this.shadowRoot) return;
 
-    this.shadowRoot.querySelector('.progress')?.classList.toggle('hidden', !showProgress);
-    this.shadowRoot.querySelector('.markdown-body')?.classList.toggle('hidden', showProgress);
+    this.shadowRoot.querySelector('.progress')?.classList.toggle('content-hidden', !showProgress);
+    this.shadowRoot.querySelector('.markdown-body')?.classList.toggle('content-hidden', showProgress);
   }
 
   // 处理所有鼠标事件
