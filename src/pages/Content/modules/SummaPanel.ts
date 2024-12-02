@@ -11,8 +11,7 @@ import { StorageService } from '../../../services/storage';
 enum ProcessStatus {
   EXTRACTING = 0,
   SUMMARIZING = 1,
-  PARSING = 2,
-  NO_MODEL = 3
+  PARSING = 2
 }
 
 class SummaPanel {
@@ -99,17 +98,6 @@ class SummaPanel {
       { status: ProcessStatus.SUMMARIZING, text: '正在总结内容...' },
       { status: ProcessStatus.PARSING, text: '正在解析总结文本...' },
     ];
-
-    // 如果是 NO_MODEL 状态，显示特殊提示
-    if (newStatus === ProcessStatus.NO_MODEL) {
-      progress.innerHTML = `
-        <div class="no-model-tip">
-          <span class="icon">${icons.warning}</span>
-          <span class="message">请先在设置中配置模型</span>
-        </div>
-      `;
-      return;
-    }
 
     // 根据当前状态更新UI
     const currentStep = steps.find(step => step.status === newStatus);
@@ -202,12 +190,6 @@ class SummaPanel {
     // 显示进度条
     this.switchContentVisibility(true);
 
-    // 检查是否有可用的模型
-    if (!this.currentModel) {
-      this.updateProcess(ProcessStatus.NO_MODEL);
-      return;
-    }
-
     if (shouldExtract) {
       this.updateProcess(ProcessStatus.EXTRACTING);
       await this.extractContent();
@@ -234,13 +216,21 @@ class SummaPanel {
       const content = await ContentExtractor.extractFromDom(docClone);
       this.content = content;
     } catch (error) {
-      console.error('提取内容失败:', error);
+      summaDebugLog('提取页面内容时发生错误:', error);
     }
   }
 
   // 总结内容
   private async summarizeContent(): Promise<void> {
-    if (!this.currentModel || !this.content) return;
+    if (!this.currentModel) {
+      this.summary = '### 错误\n\n模型未配置';
+      return;
+    }
+
+    if (!this.content) {
+      this.summary = '### 错误\n\n无法提取页面内容';
+      return;
+    }
 
     try {
       // 发送消息给 background 进行内容总结
@@ -257,24 +247,26 @@ class SummaPanel {
         throw new Error(response.error);
       }
 
-      this.summary = response.summary;
-      summaDebugLog('获取到总结内容:', this.summary);
+      this.summary = response.summary || '### 错误\n\大语言模型返回的总结为空';
     } catch (error) {
-      console.error('总结内容失败:', error as Error);
-      // 设置错误提示信息 
-      this.summary = `### 总结失败\n\n发生错误: ${(error as Error).message}`;
+      summaDebugLog('总结时发生错误:', error as Error);
+      this.summary = `### 错误\n\n总结时发生错误: ${(error as Error).message}`;
     }
   }
 
   // 解析总结
   private async parseSummary(): Promise<string> {
+    if (!this.summary) {
+      return '';
+    }
+
     marked.use({
       async: false,
       pedantic: false,
       gfm: true,
     });
+
     const html = marked.parse(this.summary) as string;
-    summaDebugLog('html summary', html);
     return html;
   }
 
@@ -300,7 +292,6 @@ class SummaPanel {
       this.bindEvents();
       this.initializeIcons();
     } catch (error) {
-      console.error('Failed to inject Summa:', error);
       summaDebugLog('注入失败:', error);
     }
   }
@@ -395,7 +386,6 @@ class SummaPanel {
         }
       })
       .catch(err => {
-        console.error('复制失败:', err);
         summaDebugLog('复制失败:', err);
       });
   }
