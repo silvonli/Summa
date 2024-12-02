@@ -32,30 +32,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // 处理总结请求
 async function handleSummarize(model: LLMModel, content: string) {
-  try {
-    // 构建 prompt
-    const prompt = `以下是需要总结的文章内容：
+
+  // 构建 prompt
+  const prompt = `以下是需要总结的文章内容：
 
 
 ${content}`;
 
-    const apiKeys = await StorageService.getUserApiKeys();
-    const baseURLs = await StorageService.getUserBaseURLs();
-    const llmModel = getModel(model.provider, model.name, apiKeys, baseURLs);
+  const apiKeys = await StorageService.getUserApiKeys();
+  const baseURLs = await StorageService.getUserBaseURLs();
+  const llmModel = getModel(model.provider, model.name, apiKeys, baseURLs);
 
-    if (!llmModel) {
-      throw new Error('Language model not initialized');
-    }
-
-    const { text } = await generateText({
-      model: llmModel,
-      system: systemPrompt,
-      prompt: prompt,
-    });
-
-    return { summary: text };
-  } catch (error) {
-    console.error('总结处理失败:', error);
-    throw error;
+  if (!llmModel) {
+    throw new Error('Language model not initialized');
   }
+
+  const { text } = await generateText({
+    model: llmModel,
+    system: systemPrompt,
+    prompt: prompt,
+  });
+
+  return { summary: text };
+
 }
