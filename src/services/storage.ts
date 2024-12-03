@@ -3,6 +3,7 @@ import { LLMProvider, LLMModel } from './provider';
 export class StorageService {
   private static PROVIDERS_KEY = 'llm_providers';
   private static CURRENT_MODEL_KEY = 'current_model';
+  private static SYSTEM_PROMPT_KEY = 'system_prompt';
 
   // 获取所有保存的providers
   static async getProviders(): Promise<Record<string, LLMProvider>> {
@@ -63,5 +64,16 @@ export class StorageService {
   static async getCurrentModel(): Promise<LLMModel | null> {
     const result = await chrome.storage.local.get(this.CURRENT_MODEL_KEY);
     return result[this.CURRENT_MODEL_KEY] || null;
+  }
+
+  // 保存系统提示
+  static async saveSystemPrompt(prompt: string): Promise<void> {
+    await chrome.storage.local.set({ [this.SYSTEM_PROMPT_KEY]: prompt });
+  }
+
+  // 获取系统提示
+  static async getSystemPrompt(): Promise<string> {
+    const result = await chrome.storage.local.get(this.SYSTEM_PROMPT_KEY);
+    return result[this.SYSTEM_PROMPT_KEY] || '';
   }
 } 

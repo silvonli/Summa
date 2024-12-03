@@ -4,6 +4,7 @@ import { LLMProvider, DEFAULT_PROVIDERS } from "../../services/provider"
 import { StorageService } from "../../services/storage"
 import "../../globals.css"
 import { ProviderConfig } from "./modules/ProviderConfig"
+import { SystemPrompt } from "./modules/SystemPrompt"
 
 // 使用 LLMProvider 类型并扩展它
 type ProviderItem = LLMProvider & {
@@ -36,6 +37,7 @@ const Options: React.FC = () => {
   const [providers, setProviders] = useState<ProviderItem[]>(PROVIDER_ITEMS)
   const [activeProvider, setActiveProvider] = useState<LLMProvider>(providers[0])
   const [providerSettings, setProviderSettings] = useState<LLMProvider | null>(null)
+  const [activeTab, setActiveTab] = useState<'providers' | 'system-prompt'>('providers')
 
   // 初始化时加载保存的数据
   useEffect(() => {
@@ -62,31 +64,58 @@ const Options: React.FC = () => {
       {/* Sidebar */}
       <div className="w-64 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-2 p-4 border-b">
-          <span className="text-base font-medium">模型服务提供商</span>
+          <span className="text-base font-medium">设置</span>
         </div>
         <nav className="p-2 space-y-1">
-          {providers.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleProviderSelect(item)}
-              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeProvider.id === item.id ? "bg-secondary" : "hover:bg-secondary/80"
-                }`}
-            >
-              <span className="w-5 h-5 flex items-center justify-center">
-                {item.icon}
-              </span>
-              <span className="text-sm">{item.name}</span>
-            </button>
-          ))}
+          <button
+            onClick={() => setActiveTab('providers')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeTab === 'providers' ? "bg-secondary" : "hover:bg-secondary/80"}`}
+          >
+            <span className="w-5 h-5 flex items-center justify-center">⚙️</span>
+            <span className="text-sm">模型服务提供商</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('system-prompt')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeTab === 'system-prompt' ? "bg-secondary" : "hover:bg-secondary/80"}`}
+          >
+            <span className="w-5 h-5 flex items-center justify-center">📝</span>
+            <span className="text-sm">系统提示设置</span>
+          </button>
         </nav>
+
+        {activeTab === 'providers' && (
+          <div className="mt-4">
+            <div className="flex items-center gap-2 p-4 border-t border-b">
+              <span className="text-base font-medium">提供商列表</span>
+            </div>
+            <nav className="p-2 space-y-1">
+              {providers.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleProviderSelect(item)}
+                  className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeProvider.id === item.id ? "bg-secondary" : "hover:bg-secondary/80"}`}
+                >
+                  <span className="w-5 h-5 flex items-center justify-center">
+                    {item.icon}
+                  </span>
+                  <span className="text-sm">{item.name}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <ProviderConfig
-          provider={providerSettings || activeProvider}
-          onProviderUpdate={handleProviderUpdate}
-        />
+        {activeTab === 'providers' ? (
+          <ProviderConfig
+            provider={providerSettings || activeProvider}
+            onProviderUpdate={handleProviderUpdate}
+          />
+        ) : (
+          <SystemPrompt />
+        )}
       </div>
     </div>
   )

@@ -3,7 +3,8 @@ import { getModel } from '../../services/model';
 import { LLMModel } from '../../services/provider';
 import { StorageService } from '../../services/storage';
 import { generateText } from 'ai';
-import { systemPrompt } from './prompt';
+import { systemPrompt as defaultSystemPrompt } from './prompt';
+
 // 监听插件图标点击事件
 chrome.action.onClicked.addListener((tab: chrome.tabs.Tab) => {
   // 向当前标签页发送消息
@@ -33,10 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // 处理总结请求
 async function handleSummarize(model: LLMModel, content: string) {
   // 构建 prompt
-  const prompt = `以下是需要总结的文章内容：
-
-
-${content}`;
+  const prompt = `以下是需要总结的文章内容：\n\n${content}`;
 
   const apiKeys = await StorageService.getUserApiKeys();
   const baseURLs = await StorageService.getUserBaseURLs();
@@ -46,12 +44,14 @@ ${content}`;
     throw new Error('Language model not initialized');
   }
 
+  // 获取存储的系统提示，如果没有则使用默认提示
+  const systemPromptText = await StorageService.getSystemPrompt() || defaultSystemPrompt;
+
   const data = await generateText({
     model: llmModel,
-    system: systemPrompt,
+    system: systemPromptText,
     prompt: prompt,
   });
 
   return { data: data };
-
 }
