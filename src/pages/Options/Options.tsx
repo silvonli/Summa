@@ -61,8 +61,8 @@ const Options: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <div className="w-64 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* 主导航 */}
+      <div className="w-48 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-2 p-4 border-b">
           <span className="text-base font-medium">设置</span>
         </div>
@@ -72,41 +72,42 @@ const Options: React.FC = () => {
             className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeTab === 'providers' ? "bg-secondary" : "hover:bg-secondary/80"}`}
           >
             <span className="w-5 h-5 flex items-center justify-center">⚙️</span>
-            <span className="text-sm">模型服务提供商</span>
+            <span className="text-sm">模型服务</span>
           </button>
           <button
             onClick={() => setActiveTab('system-prompt')}
             className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeTab === 'system-prompt' ? "bg-secondary" : "hover:bg-secondary/80"}`}
           >
             <span className="w-5 h-5 flex items-center justify-center">📝</span>
-            <span className="text-sm">系统提示设置</span>
+            <span className="text-sm">系统提示</span>
           </button>
         </nav>
-
-        {activeTab === 'providers' && (
-          <div className="mt-4">
-            <div className="flex items-center gap-2 p-4 border-t border-b">
-              <span className="text-base font-medium">提供商列表</span>
-            </div>
-            <nav className="p-2 space-y-1">
-              {providers.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleProviderSelect(item)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeProvider.id === item.id ? "bg-secondary" : "hover:bg-secondary/80"}`}
-                >
-                  <span className="w-5 h-5 flex items-center justify-center">
-                    {item.icon}
-                  </span>
-                  <span className="text-sm">{item.name}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
       </div>
 
-      {/* Main Content */}
+      {/* 提供商列表 - 仅在 providers 标签页显示 */}
+      {activeTab === 'providers' && (
+        <div className="w-56 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex items-center gap-2 p-4 border-b">
+            <span className="text-base font-medium">提供商列表</span>
+          </div>
+          <nav className="p-2 space-y-1">
+            {providers.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleProviderSelect(item)}
+                className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors ${activeProvider.id === item.id ? "bg-secondary" : "hover:bg-secondary/80"}`}
+              >
+                <span className="w-5 h-5 flex items-center justify-center">
+                  {item.icon}
+                </span>
+                <span className="text-sm">{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      {/* 主内容区域 */}
       <div className="flex-1 overflow-auto">
         {activeTab === 'providers' ? (
           <ProviderConfig
