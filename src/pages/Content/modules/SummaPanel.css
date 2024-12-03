@@ -10,7 +10,6 @@
   box-shadow: var(--summa-shadow);
   z-index: 2147483646;
   overflow: hidden;
-  backdrop-filter: blur(20px);
 
   /* 优化动画效果 */
   opacity: 1;
@@ -23,6 +22,7 @@
 }
 
 .header {
+  position: relative;
   display: flex;
   height: var(--header-height);
   justify-content: space-between;
@@ -31,13 +31,16 @@
   border-bottom: 1px solid var(--summa-border);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
+  z-index: 2;
 }
 
 .content {
+  position: relative;
   height: calc(80vh - var(--header-height));
   padding: var(--spacing-lg);
   overflow-y: auto;
   overflow-x: hidden;
+  z-index: 1;
 }
 
 .markdown-body {
@@ -66,13 +69,13 @@
 }
 
 .progress {
+  position: relative;
   display: flex;
   gap: var(--spacing-md);
   border: 1px solid var(--summa-primary-alpha);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
+  z-index: 1;
 }
 
 .steps {
