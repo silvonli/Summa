@@ -3,7 +3,7 @@ import { getModel } from '../../services/model';
 import { LLMModel } from '../../services/provider';
 import { StorageService } from '../../services/storage';
 import { generateText } from 'ai';
-import { systemPrompt as defaultSystemPrompt } from './prompt';
+import { systemPrompt as defaultSystemPrompt } from '../Options/modules/prompt';
 
 // 监听插件图标点击事件
 chrome.action.onClicked.addListener((tab: chrome.tabs.Tab) => {

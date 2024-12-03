@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StorageService } from '../../../services/storage';
-import { systemPrompt as defaultSystemPrompt } from '../../Background/prompt';
+import { systemPrompt as defaultSystemPrompt } from './prompt';
 
 export const SystemPrompt: React.FC = () => {
   const [prompt, setPrompt] = useState<string>('');
