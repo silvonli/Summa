@@ -163,7 +163,7 @@ class SummaPanel {
 
       this.currentUrl = newUrl;
       this.inject();
-      await this.processContent(true);
+      await this.processContent();
     }
 
     this.show();
@@ -197,26 +197,39 @@ class SummaPanel {
   }
 
   // 处理内容
-  private async processContent(shouldExtract = false): Promise<void> {
+  private async processContent(): Promise<void> {
+    await this.handleContentProcess({ includeExtraction: true });
+  }
+
+  private async processSummaryOnly(): Promise<void> {
+    await this.handleContentProcess({ includeExtraction: false });
+  }
+
+  private async handleContentProcess({ includeExtraction }: { includeExtraction: boolean }): Promise<void> {
     // 显示进度条
     this.switchContentVisibility(true);
 
-    if (shouldExtract) {
-      this.updateProcess(ProcessStatus.EXTRACTING);
-      await this.extractContent();
+    try {
+      // 如果需要提取内容
+      if (includeExtraction) {
+        this.updateProcess(ProcessStatus.EXTRACTING);
+        await this.extractContent();
+      }
+
+      // 总结内容
+      this.updateProcess(ProcessStatus.SUMMARIZING);
+      await this.summarizeContent();
+
+      // 解析总结
+      this.updateProcess(ProcessStatus.PARSING);
+      const html = await this.parseSummary();
+
+      // 显示内容
+      this.switchContentVisibility(false);
+      this.updateSummary(html);
+    } catch (error) {
+      summaDebugLog('处理内容时发生错误:', error);
     }
-
-    // 总结内容
-    this.updateProcess(ProcessStatus.SUMMARIZING);
-    await this.summarizeContent();
-
-    // 解析总结
-    this.updateProcess(ProcessStatus.PARSING);
-    const html = await this.parseSummary();
-
-    // 显示内容
-    this.switchContentVisibility(false);
-    this.updateSummary(html);
   }
 
   // 提取内容
@@ -244,6 +257,7 @@ class SummaPanel {
     }
 
     try {
+      this.summary = '';
       const response = await chrome.runtime.sendMessage({
         action: 'summarize',
         data: {
@@ -395,26 +409,16 @@ class SummaPanel {
   }
 
   private onCopy(): void {
-    if (!this.shadowRoot) return;
-    if (this.summary.trim() === '') return;
-
-    const markdownBody = this.shadowRoot.querySelector('.markdown-body');
-    if (!markdownBody) return;
-
-    // 获取总结的 markdown 文本
-    const markdownText = this.summary;
+    if (!this.shadowRoot || this.summary.trim() === '') return;
 
     // 复制到剪贴板
-    navigator.clipboard.writeText(markdownText)
+    navigator.clipboard.writeText(this.summary)
       .then(() => {
         const copyBtn = this.shadowRoot?.querySelector('.copy-btn');
-        if (copyBtn) {
-          // 添加复制成功样式
-          copyBtn.classList.add('copied');
-          setTimeout(() => {
-            copyBtn.classList.remove('copied');
-          }, 2000);
-        }
+        if (!copyBtn) return;
+
+        copyBtn.classList.add('copied');
+        setTimeout(() => copyBtn.classList.remove('copied'), 2000);
       })
       .catch(err => {
         summaDebugLog('复制失败:', err);
@@ -425,7 +429,7 @@ class SummaPanel {
     this.currentModel = model;
     StorageService.saveCurrentModel(model);
     this.initModelNameDisplay();
-    this.processContent(false);
+    this.processSummaryOnly();
   }
 
   private onClose(): void {
