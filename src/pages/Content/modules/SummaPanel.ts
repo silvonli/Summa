@@ -242,6 +242,7 @@ class SummaPanel {
     } catch (error) {
       summaDebugLog('提取页面内容时发生错误:', error);
     }
+
   }
 
   // 总结内容
