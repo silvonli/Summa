@@ -65,6 +65,7 @@ const Options: React.FC = () => {
       <MainNav
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        className="z-20"
       />
 
       {activeTab === 'providers' && (
@@ -72,6 +73,7 @@ const Options: React.FC = () => {
           providers={providers}
           activeProvider={activeProvider}
           onProviderSelect={handleProviderSelect}
+          className="z-10"
         />
       )}
 

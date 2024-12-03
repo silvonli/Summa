@@ -5,15 +5,17 @@ interface ProviderListProps {
   providers: Array<LLMProvider & { icon: string }>;
   activeProvider: LLMProvider;
   onProviderSelect: (provider: LLMProvider) => void;
+  className?: string;
 }
 
 export const ProviderList: React.FC<ProviderListProps> = ({
   providers,
   activeProvider,
   onProviderSelect,
+  className
 }) => {
   return (
-    <div className="w-64 bg-[#f5f5f7] border-r border-[#e5e5e7]">
+    <div className={`w-64 bg-[#f5f5f7] border-r border-[#e5e5e7] ${className}`}>
       <div className="flex items-center px-6 py-4 border-b border-[#e5e5e7]">
         <span className="text-sm font-medium text-[#86868b]">提供商列表</span>
       </div>
@@ -25,7 +27,7 @@ export const ProviderList: React.FC<ProviderListProps> = ({
             className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] rounded-xl transition-all duration-200
               ${activeProvider.id === item.id
                 ? "bg-white text-[#1d1d1f] shadow-sm"
-                : "hover:bg-white/40 text-[#86868b]"}`}
+                : "hover:bg-white/60 text-[#86868b]"}`}
           >
             <span className="w-5 h-5 flex items-center justify-center opacity-80">
               {item.icon}
