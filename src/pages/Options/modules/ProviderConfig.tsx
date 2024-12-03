@@ -35,47 +35,50 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="space-y-2">
+    <div className="p-8 space-y-8">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{provider.name} 配置</h2>
+          <h2 className="text-2xl font-medium text-[#1d1d1f]">{provider.name} 配置</h2>
           <Switch
             checked={provider.enable}
             onCheckedChange={(checked) => handleConfigChange('enable', checked)}
+            className="data-[state=checked]:bg-[#0071e3]"
             aria-label={`${provider.name}启用开关`}
           />
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-[#86868b]">
           配置 {provider.name} 的连接信息和可用模型
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="apiKey">API 密钥</Label>
+          <Label htmlFor="apiKey" className="text-[#1d1d1f]">API 密钥</Label>
           <Input
             id="apiKey"
             value={provider.apiKey || ''}
             onChange={(e) => handleConfigChange('apiKey', e.target.value)}
             placeholder="输入 API Key"
+            className="rounded-xl border-[#e5e5e7] focus:border-[#0071e3] focus:ring-[#0071e3]"
           />
         </div>
 
         {provider.apiHost !== undefined && (
           <div className="space-y-2">
-            <Label htmlFor="apiHost">API 地址</Label>
+            <Label htmlFor="apiHost" className="text-[#1d1d1f]">API 地址</Label>
             <Input
               id="apiHost"
               value={provider.apiHost || ''}
               onChange={(e) => handleConfigChange('apiHost', e.target.value)}
               placeholder="输入 API Host"
+              className="rounded-xl border-[#e5e5e7] focus:border-[#0071e3] focus:ring-[#0071e3]"
             />
           </div>
         )}
 
         <div className="space-y-2">
           {provider.models.length > 0 && (
-            <Label>可用模型</Label>
+            <Label className="text-[#1d1d1f]">可用模型</Label>
           )}
           <div className="grid gap-2">
             {provider.models.map((model) => (
@@ -109,7 +112,7 @@ export const ProviderConfig: React.FC<ProviderConfigProps> = ({
           </div>
         </div>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-6">
           <AddModelDialog
             provider={provider}
             onModelsUpdate={handleModelsChange}

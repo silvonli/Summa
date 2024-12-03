@@ -13,21 +13,21 @@ export const ProviderList: React.FC<ProviderListProps> = ({
   onProviderSelect,
 }) => {
   return (
-    <div className="w-56 border-r bg-background">
-      <div className="flex items-center gap-2 px-4 py-3 border-b">
-        <span className="text-sm font-medium text-foreground/70">提供商列表</span>
+    <div className="w-64 bg-[#f5f5f7] border-r border-[#e5e5e7]">
+      <div className="flex items-center px-6 py-4 border-b border-[#e5e5e7]">
+        <span className="text-sm font-medium text-[#86868b]">提供商列表</span>
       </div>
-      <nav className="p-2 space-y-0.5">
+      <nav className="p-3 space-y-1">
         {providers.map((item) => (
           <button
             key={item.id}
             onClick={() => onProviderSelect(item)}
-            className={`w-full flex items-center gap-2 px-3 py-2 text-[13px] rounded-md transition-colors
+            className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] rounded-xl transition-all duration-200
               ${activeProvider.id === item.id
-                ? "bg-secondary/80 text-foreground"
-                : "hover:bg-secondary/40 text-foreground/70"}`}
+                ? "bg-white text-[#1d1d1f] shadow-sm"
+                : "hover:bg-white/40 text-[#86868b]"}`}
           >
-            <span className="w-4 h-4 flex items-center justify-center opacity-70">
+            <span className="w-5 h-5 flex items-center justify-center opacity-80">
               {item.icon}
             </span>
             <span>{item.name}</span>

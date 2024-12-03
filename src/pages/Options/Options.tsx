@@ -61,7 +61,7 @@ const Options: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-[#f5f5f7]">
       <MainNav
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -75,7 +75,7 @@ const Options: React.FC = () => {
         />
       )}
 
-      <div className="flex-1 overflow-auto bg-background">
+      <div className="flex-1 overflow-auto bg-white rounded-tl-2xl shadow-sm">
         {activeTab === 'providers' ? (
           <ProviderConfig
             provider={providerSettings || activeProvider}
