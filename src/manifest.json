@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Summa",
-  "description": "智能文章总结插件，让阅读更高效",
+  "description": "使用 AI 总结页面内容，让阅读更高效",
   "permissions": [
     "activeTab",
     "storage"

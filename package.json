@@ -1,7 +1,7 @@
 {
   "name": "summa",
   "version": "1.0.0",
-  "description": "智能文章总结插件,让阅读更高效",
+  "description": "提取页面内容并使用 AI 进行总结的 Chrome 插件",
   "license": "MIT",
   "repository": {
     "type": "git",
