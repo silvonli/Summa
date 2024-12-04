@@ -8,57 +8,45 @@ import { SystemPrompt } from "./modules/SystemPrompt"
 import { MainNav } from "./modules/MainNav"
 import { ProviderList } from "./modules/ProviderList"
 
-// 使用 LLMProvider 类型并扩展它
-type ProviderItem = LLMProvider & {
-  icon: string
-}
-
-// 定义图标映射
-const PROVIDER_ICONS: Record<string, string> = {
-  ANTHROPIC: "🎯",
-  OPENAI: "🧠",
-  GOOGLE: "🌐",
-  GROQ: "⚡",
-  OPENROUTER: "🔧",
-  DEEPSEEK: "🔍",
-  MISTRAL: "🌟",
-  OPENAI_LIKE: "☁️",
-  LMSTUDIO: "🔬",
-  OLLAMA: "🐪"
-}
-
-// 使用默认提供商列表初始化 PROVIDER_ITEMS
-const PROVIDER_ITEMS: ProviderItem[] = DEFAULT_PROVIDERS.map(provider => ({
-  ...provider,
-  icon: PROVIDER_ICONS[provider.id] || "🔧",
-  enable: false,
-}))
-
 const Options: React.FC = () => {
-  const [providers, setProviders] = useState<ProviderItem[]>(PROVIDER_ITEMS)
-  const [activeProvider, setActiveProvider] = useState<LLMProvider>(providers[0])
-  const [providerSettings, setProviderSettings] = useState<LLMProvider | null>(null)
+  const [providers, setProviders] = useState<LLMProvider[]>([])
+  const [activeProvider, setActiveProvider] = useState<LLMProvider | null>(null)
   const [activeTab, setActiveTab] = useState<'providers' | 'system-prompt'>('providers')
 
-  // 初始化时加载保存的数据
+  // 初始化提供商列表
   useEffect(() => {
-    const loadProviderSettings = async () => {
-      const savedData = await StorageService.getProvider(activeProvider.id);
-      setProviderSettings(savedData);
+    // 加载保存的数据
+    const initializeProviderSettings = async () => {
+      const storedProviderSettings = await StorageService.getProviders();
+      // 合并 storedProviderSettings 和 DEFAULT_PROVIDERS
+      const combinedProviderSettings = DEFAULT_PROVIDERS.map(defaultProvider => ({
+        ...defaultProvider,
+        ...storedProviderSettings[defaultProvider.id]
+      }));
+      setProviders(combinedProviderSettings);
+      setActiveProvider(combinedProviderSettings[0]);
     };
-    loadProviderSettings();
-  }, [activeProvider.id]);
+    initializeProviderSettings();
+  }, [])
+
 
   const handleProviderSelect = async (provider: LLMProvider) => {
     setActiveProvider(provider);
-    const savedData = await StorageService.getProvider(provider.id);
-    setProviderSettings(savedData);
   };
 
   const handleProviderUpdate = async (updatedProvider: LLMProvider) => {
+    setActiveProvider(updatedProvider);
+    setProviders(prevProviders =>
+      prevProviders.map(provider =>
+        provider.id === updatedProvider.id ? updatedProvider : provider
+      )
+    );
     await StorageService.saveProvider(updatedProvider);
-    setProviderSettings(updatedProvider);
   };
+
+  if (!activeProvider) {
+    return null; // 或者返回一个加载状态的组件
+  }
 
   return (
     <div className="flex h-screen bg-[#f5f5f7]">
@@ -80,7 +68,7 @@ const Options: React.FC = () => {
       <div className="flex-1 overflow-auto bg-white rounded-tl-2xl shadow-sm">
         {activeTab === 'providers' ? (
           <ProviderConfig
-            provider={providerSettings || activeProvider}
+            provider={activeProvider}
             onProviderUpdate={handleProviderUpdate}
           />
         ) : (

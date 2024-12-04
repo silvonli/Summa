@@ -1,8 +1,23 @@
 import React from 'react';
 import { LLMProvider } from '../../../services/provider';
 
+
+// 定义图标
+const PROVIDER_ICONS: Record<string, string> = {
+  ANTHROPIC: "🎯",
+  OPENAI: "🧠",
+  GOOGLE: "🌐",
+  GROQ: "⚡",
+  OPENROUTER: "🔧",
+  DEEPSEEK: "🔍",
+  MISTRAL: "🌟",
+  OPENAI_LIKE: "☁️",
+  LMSTUDIO: "🔬",
+  OLLAMA: "🐪"
+}
+
 interface ProviderListProps {
-  providers: Array<LLMProvider & { icon: string }>;
+  providers: Array<LLMProvider>;
   activeProvider: LLMProvider;
   onProviderSelect: (provider: LLMProvider) => void;
   className?: string;
@@ -30,9 +45,14 @@ export const ProviderList: React.FC<ProviderListProps> = ({
                 : "hover:bg-white/60 text-[#86868b]"}`}
           >
             <span className="w-5 h-5 flex items-center justify-center opacity-80">
-              {item.icon}
+              {PROVIDER_ICONS[item.id] || "🔧"}
             </span>
-            <span>{item.name}</span>
+            <span className="flex-1 text-left">{item.name}</span>
+            {item.enable && (
+              <span className="px-2 py-0.5 text-[11px] bg-[#0a84ff]/10 text-[#0a84ff] rounded-full">
+                已启用
+              </span>
+            )}
           </button>
         ))}
       </nav>
