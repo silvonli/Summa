@@ -36,31 +36,44 @@ class SummaPanel {
   }
 
   async init(): Promise<void> {
-    // 预先加载模型列表
-    this.modelList = await StorageService.getModelList();
-
-    // 初始化当前模型
-    await this.initializeCurrentModel();
-
-    // 监听来自 background 的消息
+    // 只监听来自 background 的消息
     chrome.runtime.onMessage.addListener(this.handleMessages.bind(this));
+  }
+
+  // 懒加载获取模型列表
+  private async getModelList(): Promise<LLMModel[]> {
+    if (this.modelList.length === 0) {
+      this.modelList = await StorageService.getModelList();
+    }
+    return this.modelList;
+  }
+
+  // 懒加载获取当前模型
+  private async getCurrentModel(): Promise<LLMModel | null> {
+    if (!this.currentModel) {
+      await this.initializeCurrentModel();
+    }
+    return this.currentModel;
   }
 
   // 初始化当前模型
   private async initializeCurrentModel(): Promise<void> {
+    // 确保模型列表已加载
+    const modelList = await this.getModelList();
+
     // 如果模型列表为空则直接返回
-    if (this.modelList.length === 0) return;
+    if (modelList.length === 0) return;
 
     const savedModel = await StorageService.getCurrentModel();
     // 如果没有保存的模型,使用第一个模型
     if (!savedModel) {
-      this.currentModel = this.modelList[0];
+      this.currentModel = modelList[0];
       StorageService.saveCurrentModel(this.currentModel);
       return;
     }
 
     // 检查保存的模型是否在当前列表中
-    const modelExists = this.modelList.some(model =>
+    const modelExists = modelList.some(model =>
       model.id === savedModel.id &&
       model.provider === savedModel.provider
     );
@@ -68,7 +81,7 @@ class SummaPanel {
     if (modelExists) {
       this.currentModel = savedModel;
     } else {
-      this.currentModel = this.modelList[0];
+      this.currentModel = modelList[0];
       StorageService.saveCurrentModel(this.currentModel);
     }
   }
@@ -247,7 +260,8 @@ class SummaPanel {
 
   // 总结内容
   private async summarizeContent(): Promise<void> {
-    if (!this.currentModel) {
+    const currentModel = await this.getCurrentModel();
+    if (!currentModel) {
       this.summary = '### 错误\n\n模型未配置';
       return;
     }
@@ -262,7 +276,7 @@ class SummaPanel {
       const response = await chrome.runtime.sendMessage({
         action: 'summarize',
         data: {
-          model: this.currentModel,
+          model: currentModel,
           content: this.content,
           url: this.currentUrl
         }
@@ -339,12 +353,13 @@ class SummaPanel {
     });
   }
 
-  private initModelNameDisplay(): void {
+  private async initModelNameDisplay(): Promise<void> {
     if (!this.shadowRoot) return;
 
+    const currentModel = await this.getCurrentModel();
     const modelNameSpan = this.shadowRoot.querySelector<HTMLSpanElement>('.refresh-btn .model-name');
     if (modelNameSpan) {
-      modelNameSpan.textContent = this.currentModel?.name ?? '未选择模型';
+      modelNameSpan.textContent = currentModel?.name ?? '未选择模型';
     }
   }
 
@@ -388,8 +403,9 @@ class SummaPanel {
     settingsBtn?.addEventListener('click', () => this.onSettings());
   }
 
-  private onRefresh(event: MouseEvent): void {
-    if (!this.shadowRoot || this.modelList.length === 0) return;
+  private async onRefresh(event: MouseEvent): Promise<void> {
+    const modelList = await this.getModelList();
+    if (!this.shadowRoot || modelList.length === 0) return;
 
     event.stopPropagation();
 
@@ -397,7 +413,7 @@ class SummaPanel {
     if (!this.currentMenu) {
       this.currentMenu = new ModelMenu(
         this.shadowRoot,
-        this.modelList,
+        modelList,
         this.onModelSelect.bind(this)
       );
     }
