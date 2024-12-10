@@ -158,7 +158,7 @@ class SummaPanel {
   }
 
   // clickedSumma 方法
-  private async onClickedSumma(): Promise<void> {
+  private onClickedSumma() {
     // 如果已经显示,直接隐藏
     if (this.isShow) {
       this.hide();
@@ -167,27 +167,31 @@ class SummaPanel {
 
     const newUrl = window.location.href;
 
-    // 如果未初始化或 URL 发生变化,需要重新注入
-    if (!this.hostNode || this.currentUrl !== newUrl) {
-      // 如果存在旧的节点,先移除
-      if (this.hostNode) {
-        this.remove();
-      }
-
+    // 如果没有宿主节点，需要初始化
+    if (!this.hostNode) {
       this.currentUrl = newUrl;
       this.inject();
-      await this.processContent();
+      this.show();
+      this.processContent();
+      return;
     }
 
+    // 如果 URL 发生变化，需要重新处理
+    if (this.currentUrl !== newUrl) {
+      this.currentUrl = newUrl;
+      this.show();
+      this.processContent();
+      return;
+    }
+
+    // URL 没有变化，直接显示
     this.show();
   }
 
   // 隐藏界面
   private hide(): void {
     this.isShow = false;
-    requestAnimationFrame(() => {
-      this.shadowRoot?.querySelector('.panel')?.classList.add('hidden');
-    });
+    this.shadowRoot?.querySelector('.panel')?.classList.add('hidden');
 
     // 移除事件监听
     if (this.mouseEventHandler) {
@@ -199,10 +203,7 @@ class SummaPanel {
   // 显示界面
   private show(): void {
     this.isShow = true;
-
-    requestAnimationFrame(() => {
-      this.shadowRoot?.querySelector('.panel')?.classList.remove('hidden');
-    });
+    this.shadowRoot?.querySelector('.panel')?.classList.remove('hidden');
 
     // 添加统一的鼠标事件监听
     this.mouseEventHandler = this.handleMouseEvent.bind(this);
@@ -211,24 +212,33 @@ class SummaPanel {
 
   // 处理内容
   private async processContent(): Promise<void> {
-    await this.handleContentProcess({ includeExtraction: true });
+    try {
+      // 显示进度条
+      this.switchContentVisibility(true);
+      // 提取内容
+      this.updateProcess(ProcessStatus.EXTRACTING);
+      await this.extractContent();
+
+      // 总结内容
+      this.updateProcess(ProcessStatus.SUMMARIZING);
+      await this.summarizeContent();
+
+      // 解析总结
+      this.updateProcess(ProcessStatus.PARSING);
+      const html = await this.parseSummary();
+
+      // 显示内容
+      this.switchContentVisibility(false);
+      this.updateSummary(html);
+    } catch (error) {
+      summaDebugLog('处理内容时发生错误:', error);
+    }
   }
 
   private async processSummaryOnly(): Promise<void> {
-    await this.handleContentProcess({ includeExtraction: false });
-  }
-
-  private async handleContentProcess({ includeExtraction }: { includeExtraction: boolean }): Promise<void> {
-    // 显示进度条
-    this.switchContentVisibility(true);
-
     try {
-      // 如果需要提取内容
-      if (includeExtraction) {
-        this.updateProcess(ProcessStatus.EXTRACTING);
-        await this.extractContent();
-      }
-
+      // 显示进度条
+      this.switchContentVisibility(true);
       // 总结内容
       this.updateProcess(ProcessStatus.SUMMARIZING);
       await this.summarizeContent();
