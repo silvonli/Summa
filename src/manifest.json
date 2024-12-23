@@ -4,11 +4,13 @@
   "description": "使用 AI 总结页面内容，让阅读更高效",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "offscreen"
   ],
   "options_page": "options.html",
   "background": {
-    "service_worker": "background.bundle.js"
+    "service_worker": "background.bundle.js",
+    "type": "module"
   },
   "action": {
     "default_icon": "icon-34.png"
@@ -33,7 +35,8 @@
       "resources": [
         "content.styles.css",
         "icon-128.png",
-        "icon-34.png"
+        "icon-34.png",
+        "offscreen.html"
       ],
       "matches": [
         "<all_urls>"

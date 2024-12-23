@@ -1,4 +1,5 @@
 import { summaDebugLog } from '../../lib/utils';
+import { ContentExtractor } from './ContentExtractor';
 import { getModel } from '../../services/model';
 import { LLMModel } from '../../services/provider';
 import { StorageService } from '../../services/storage';
@@ -21,6 +22,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.runtime.openOptionsPage();
   }
 
+  if (request.action === 'extractContent') {
+    handleExtract(request.data.html)
+      .then(content => {
+        sendResponse({ data: { content } });
+      })
+      .catch(error => {
+        sendResponse({ error: error.message });
+      });
+    return true; // 表示会异步发送响应
+  }
+
   if (request.action === 'summarize') {
     handleSummarize(request.data.model, request.data.content)
       .then(sendResponse)
@@ -31,7 +43,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// 处理总结请求
+// 处理提取内容消息
+async function handleExtract(html: string): Promise<string> {
+  summaDebugLog('Background: 开始处理提取内容请求', { htmlLength: html.length });
+  try {
+    const content = await ContentExtractor.extract(html);
+    summaDebugLog('Background: 内容提取成功', { contentLength: content.length });
+    return content;
+  } catch (error) {
+    summaDebugLog('Background: 内容提取失败', error);
+    throw error;
+  }
+}
+
+// 处理总结消息
 async function handleSummarize(model: LLMModel, content: string) {
   // 构建 prompt
   const prompt = `以下是需要总结的文章内容：\n\n${content}`;

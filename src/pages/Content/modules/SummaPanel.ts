@@ -2,7 +2,6 @@ import { summaDebugLog } from '../../../lib/utils';
 import htmlTemplate from './SummaPanel.html';
 import { marked } from 'marked';
 import { icons } from '../../../lib/icons';
-import { ContentExtractor } from '../utils/ContentExtractor';
 import { LLMModel } from '../../../services/provider';
 import { ModelMenu } from './ModelMenu';
 import { StorageService } from '../../../services/storage';
@@ -258,14 +257,35 @@ class SummaPanel {
   // 提取内容
   private async extractContent(): Promise<void> {
     try {
-      // 获取当前页面的 HTML
-      const docClone = document.cloneNode(true) as Document;
-      const content = await ContentExtractor.extractFromDom(docClone);
-      this.content = content;
-    } catch (error) {
-      summaDebugLog('提取页面内容时发生错误:', error);
-    }
+      summaDebugLog('SummaPanel: 开始提取页面内容');
 
+      // 获取当前页面的序列化 HTML
+      const docHtml = document.documentElement.outerHTML;
+      summaDebugLog('SummaPanel: 页面序列化完成', {
+        htmlLength: docHtml.length,
+        url: this.currentUrl
+      });
+
+      // 发送消息给 background 进行内容提取
+      const response = await chrome.runtime.sendMessage({
+        action: 'extractContent',
+        data: {
+          html: docHtml,
+          url: this.currentUrl
+        }
+      });
+
+      if (response.error) {
+        summaDebugLog('SummaPanel: 内容提取失败', { error: response.error });
+        throw new Error(response.error);
+      }
+
+      this.content = response.data.content;
+      summaDebugLog('SummaPanel: 内容提取成功', { contentLength: this.content.length });
+    } catch (error) {
+      summaDebugLog('SummaPanel: 提取页面内容时发生错误', error);
+      throw error; // 向上传递错误
+    }
   }
 
   // 总结内容

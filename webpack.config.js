@@ -43,9 +43,10 @@ var options = {
     options: path.join(__dirname, 'src', 'pages', 'Options', 'Options.tsx'),
     background: path.join(__dirname, 'src', 'pages', 'Background', 'background.ts'),
     contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'content.ts'),
+    offscreen: path.join(__dirname, 'src', 'pages', 'Background', 'offscreen.ts'),
   },
   chromeExtensionBoilerplate: {
-    notHotReload: ['background', 'contentScript'],
+    notHotReload: ['background', 'contentScript', 'offscreen'],
   },
   output: {
     filename: '[name].bundle.js',
@@ -182,7 +183,15 @@ var options = {
         },
       ],
     }),
-
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/assets/offscreen.html',
+          to: path.join(__dirname, 'build'),
+          force: true,
+        },
+      ],
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'pages', 'Options', 'index.html'),
       filename: 'options.html',
