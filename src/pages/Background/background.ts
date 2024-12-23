@@ -1,4 +1,3 @@
-import { summaDebugLog } from '../../lib/utils';
 import { StorageService } from '../../services/storage';
 import { LLMModel } from '../../services/LLM/provider';
 import { getModel } from '../../services/LLM/model';
@@ -9,7 +8,6 @@ import { systemPrompt as defaultSystemPrompt } from '../Options/modules/prompt';
 chrome.action.onClicked.addListener((tab: chrome.tabs.Tab) => {
   // 向当前标签页发送消息
   if (tab.id) {
-    summaDebugLog('发送 clickedSumma 消息到标签页:', tab.id);
     chrome.tabs.sendMessage(tab.id, {
       action: 'clickedSumma'
     });
@@ -24,7 +22,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'extractContent') {
     handleExtract(request.data.html)
       .then(content => {
-        sendResponse({ data: { content } });
+        sendResponse({ data: content });
       })
       .catch(error => {
         sendResponse({ error: error.message });
@@ -34,7 +32,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'summarize') {
     handleSummarize(request.data.model, request.data.content)
-      .then(sendResponse)
+      .then(summary => {
+        sendResponse({ data: summary });
+      })
       .catch(error => {
         sendResponse({ error: error.message });
       });
@@ -44,38 +44,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // 处理提取内容消息
 async function handleExtract(html: string): Promise<string> {
-  summaDebugLog('Background: 开始处理提取内容请求', { htmlLength: html.length });
-  try {
-    // 检查是否已存在 offscreen 文档
-    const existingContexts = await chrome.runtime.getContexts({
-      contextTypes: ['OFFSCREEN_DOCUMENT']
+  // 检查是否已存在 offscreen 文档
+  const existingContexts = await chrome.runtime.getContexts({
+    contextTypes: ['OFFSCREEN_DOCUMENT']
+  });
+
+  if (existingContexts.length === 0) {
+    // 创建 offscreen 文档
+    await chrome.offscreen.createDocument({
+      url: 'offscreen.html',
+      reasons: ['DOM_PARSER'],
+      justification: '需要使用 DOMParser 来解析 HTML'
     });
-
-    if (existingContexts.length === 0) {
-      // 创建 offscreen 文档
-      await chrome.offscreen.createDocument({
-        url: 'offscreen.html',
-        reasons: ['DOM_PARSER'],
-        justification: '需要使用 DOMParser 来解析 HTML'
-      });
-    }
-
-    // 发送消息到 offscreen 文档进行处理
-    const response = await chrome.runtime.sendMessage({
-      type: 'OFFSCREEN_EXTRACT_HTML',
-      html
-    });
-
-    if (!response.success) {
-      throw new Error(response.error);
-    }
-
-    summaDebugLog('Background: 内容提取成功', { contentLength: response.markdown.length });
-    return response.markdown;
-  } catch (error) {
-    summaDebugLog('Background: 内容提取失败', error);
-    throw error;
   }
+
+  // 发送消息到 offscreen 文档进行处理
+  const response = await chrome.runtime.sendMessage({
+    type: 'OFFSCREEN_EXTRACT_MARKDOWN',
+    html
+  });
+
+  if (!response.success) {
+    throw new Error(response.error);
+  }
+
+  return response.markdown;
+
 }
 
 // 处理总结消息
@@ -93,11 +87,11 @@ async function handleSummarize(model: LLMModel, content: string) {
   // 构建 prompt
   const prompt = `以下是需要总结的文章内容：\n\n${content}`;
 
-  const data = await generateText({
+  const response = await generateText({
     model: llmModel,
     system: systemPromptText,
     prompt: prompt,
   });
 
-  return { data: data };
+  return response.text;
 }

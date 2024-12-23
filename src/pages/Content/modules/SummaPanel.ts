@@ -1,4 +1,4 @@
-import { summaDebugLog } from '../../../lib/utils';
+import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
 import htmlTemplate from './SummaPanel.html';
 import { marked } from 'marked';
 import { icons } from '../../../lib/icons';
@@ -230,7 +230,7 @@ class SummaPanel {
       this.switchContentVisibility(false);
       this.updateSummary(html);
     } catch (error) {
-      summaDebugLog('处理内容时发生错误:', error);
+      summaErrorLog('处理内容时发生错误:', error);
     }
   }
 
@@ -250,7 +250,7 @@ class SummaPanel {
       this.switchContentVisibility(false);
       this.updateSummary(html);
     } catch (error) {
-      summaDebugLog('处理内容时发生错误:', error);
+      summaErrorLog('处理内容时发生错误:', error);
     }
   }
 
@@ -259,14 +259,8 @@ class SummaPanel {
     try {
       summaDebugLog('SummaPanel: 开始提取页面内容');
 
-      // 获取当前页面的序列化 HTML
-      const docHtml = document.documentElement.outerHTML;
-      summaDebugLog('SummaPanel: 页面序列化完成', {
-        htmlLength: docHtml.length,
-        url: this.currentUrl
-      });
-
       // 发送消息给 background 进行内容提取
+      const docHtml = document.documentElement.outerHTML;
       const response = await chrome.runtime.sendMessage({
         action: 'extractContent',
         data: {
@@ -277,14 +271,13 @@ class SummaPanel {
 
       if (response.error) {
         summaDebugLog('SummaPanel: 内容提取失败', { error: response.error });
-        throw new Error(response.error);
+        return;
       }
 
-      this.content = response.data.content;
-      summaDebugLog('SummaPanel: 内容提取成功', { contentLength: this.content.length });
+      this.content = response.data;
+
     } catch (error) {
-      summaDebugLog('SummaPanel: 提取页面内容时发生错误', error);
-      throw error; // 向上传递错误
+      summaErrorLog('SummaPanel: 提取页面内容时发生错误', error);
     }
   }
 
@@ -315,10 +308,10 @@ class SummaPanel {
       if (response.error) {
         this.summary = `### 错误\n\n总结时发生错误: ${response.error}`;
       } else {
-        this.summary = response.data.text || '### 错误\n\大语言模型返回的总结为空';
+        this.summary = response.data || '### 错误\n\大语言模型返回的总结为空';
       }
     } catch (error) {
-      summaDebugLog('总结时发生错误:', error as Error);
+      summaErrorLog('总结时发生错误:', error);
       this.summary = `### 错误\n\n总结时发生错误: ${error as Error}`;
     }
   }
@@ -362,7 +355,7 @@ class SummaPanel {
       this.initializeIcons();
       this.initModelNameDisplay();
     } catch (error) {
-      summaDebugLog('注入失败:', error);
+      summaErrorLog('注入失败:', error);
     }
   }
 
@@ -468,7 +461,7 @@ class SummaPanel {
         setTimeout(() => copyBtn.classList.remove('copied'), 2000);
       })
       .catch(err => {
-        summaDebugLog('复制失败:', err);
+        summaErrorLog('复制失败:', err);
       });
   }
 
@@ -488,7 +481,6 @@ class SummaPanel {
     chrome.runtime.sendMessage({ action: 'openOptionsPage' });
     // 隐藏当前面板
     this.hide();
-    summaDebugLog('Settings clicked, requesting to open options page');
   }
 
   // 切换内容区域的显示内容

@@ -14,6 +14,16 @@ export function summaDebugLog(tag: string, ...messages: unknown[]) {
       )
       .join(' ');
 
-    console.log(`[SUMMA_DEBUG]-${tag}: ${formattedMessages}`);
+    console.log(`[SUMMA_DEBUG]-${tag} ${formattedMessages}`);
   }
+}
+
+// 打印错误日志
+export function summaErrorLog(tag: string, error: unknown) {
+  const formattedError = {
+    message: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    name: error instanceof Error ? error.name : typeof error
+  }
+  console.log(`[SUMMA_DEBUG]-${tag} ${JSON.stringify(formattedError)}`);
 }
