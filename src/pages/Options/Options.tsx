@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { createRoot } from 'react-dom/client';
-import { LLMProvider, DEFAULT_PROVIDERS } from "../../services/provider"
+import { LLMProvider, DEFAULT_PROVIDERS } from "../../services/LLM/provider"
 import { StorageService } from "../../services/storage"
 import "../../globals.css"
 import { ProviderConfig } from "./modules/ProviderConfig"

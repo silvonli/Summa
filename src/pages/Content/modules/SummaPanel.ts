@@ -2,7 +2,7 @@ import { summaDebugLog } from '../../../lib/utils';
 import htmlTemplate from './SummaPanel.html';
 import { marked } from 'marked';
 import { icons } from '../../../lib/icons';
-import { LLMModel } from '../../../services/provider';
+import { LLMModel } from '../../../services/LLM/provider';
 import { ModelMenu } from './ModelMenu';
 import { StorageService } from '../../../services/storage';
 // 进度状态 

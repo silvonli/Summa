@@ -1,5 +1,5 @@
 import React from 'react';
-import { LLMProvider } from '../../../services/provider';
+import { LLMProvider } from '../../../services/LLM/provider';
 
 
 // 定义图标

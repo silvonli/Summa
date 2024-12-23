@@ -78,7 +78,7 @@ const extractContent = async (html: string): Promise<string> => {
 
 // 监听来自 Service Worker 的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'EXTRACT_CONTENT') {
+  if (message.type === 'OFFSCREEN_EXTRACT_HTML') {
     extractContent(message.html)
       .then(markdown => {
         sendResponse({ success: true, markdown });

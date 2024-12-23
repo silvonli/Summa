@@ -11,7 +11,7 @@ import { Label } from "../../../components/ui/label"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
 import { Plus } from "lucide-react"
-import { LLMProvider, LLMModel } from '../../../services/provider'
+import { LLMProvider, LLMModel } from '../../../services/LLM/provider'
 
 interface AddModelDialogProps {
   provider: LLMProvider
