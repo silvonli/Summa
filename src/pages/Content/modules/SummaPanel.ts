@@ -108,30 +108,32 @@ class SummaPanel {
     const steps = [
       {
         status: ProcessStatus.EXTRACTING,
-        pending: '正在提取内容...',
-        completed: '内容提取完成'
+        pending: newStatus < ProcessStatus.EXTRACTING ? '等待提取..' :
+          newStatus === ProcessStatus.EXTRACTING ? '正在提取内容...' :
+            '完成内容提取.',
       },
       {
         status: ProcessStatus.SUMMARIZING,
-        pending: '正在总结内容...',
-        completed: '内容总结完成'
+        pending: newStatus < ProcessStatus.SUMMARIZING ? '等待总结..' :
+          newStatus === ProcessStatus.SUMMARIZING ? '正在总结内容...' :
+            '完成内容总结.',
       },
       {
         status: ProcessStatus.PARSING,
-        pending: '正在解析总结文本...',
-        completed: '解析完成'
+        pending: newStatus < ProcessStatus.PARSING ? '等待解析..' :
+          newStatus === ProcessStatus.PARSING ? '正在解析文本...' :
+            '完成文本解析.',
       },
     ];
 
     const getStepHtml = (step: {
       status: ProcessStatus;
       pending: string;
-      completed: string;
     }) => {
       const isPending = step.status >= newStatus;
       const icon = isPending ? icons.spinner : icons.check;
       const stepClass = isPending ? 'step pending' : 'step';
-      const text = isPending ? step.pending : step.completed;
+      const text = step.pending;
 
       return `
         <div class="${stepClass}">
