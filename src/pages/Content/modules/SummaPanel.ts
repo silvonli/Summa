@@ -23,6 +23,7 @@ class SummaPanel {
   private currentModel: LLMModel | null = null;
   private modelList: LLMModel[] = [];
   private currentMenu: ModelMenu | null = null;
+  private currentRequestId: string;
 
   constructor() {
     this.hostNode = null;
@@ -32,6 +33,7 @@ class SummaPanel {
     this.summary = '';
     this.currentUrl = '';
     this.mouseEventHandler = null;
+    this.currentRequestId = '';
   }
 
   async init(): Promise<void> {
@@ -155,6 +157,50 @@ class SummaPanel {
 
     markdownBody.innerHTML = html;
   }
+  // 处理内容
+  private async processContent(shouldExtractContent: boolean = true): Promise<void> {
+    try {
+      // 生成新的请求ID
+      const requestId = Date.now().toString();
+      this.currentRequestId = requestId;
+      // 显示进度条
+      this.switchContentVisibility(true);
+
+      // 检查请求是否被取消
+      const isRequestCancelled = () => {
+        if (this.currentRequestId !== requestId) {
+          summaDebugLog('processContent: 检测到新请求，终止当前处理');
+          return true;
+        }
+        return false;
+      };
+
+      // 提取内容
+      if (shouldExtractContent) {
+        // 提取内容
+        this.updateProcess(ProcessStatus.EXTRACTING);
+        await this.extractContent();
+        if (isRequestCancelled()) return;
+      }
+
+      // 总结内容
+      this.updateProcess(ProcessStatus.SUMMARIZING);
+      await this.summarizeContent();
+      if (isRequestCancelled()) return;
+
+      // 解析总结
+      this.updateProcess(ProcessStatus.PARSING);
+      const html = await this.parseSummary();
+      if (isRequestCancelled()) return;
+
+      // 显示内容
+      this.switchContentVisibility(false);
+      this.updateSummary(html);
+
+    } catch (error) {
+      summaErrorLog('处理内容时发生错误:', error);
+    }
+  }
 
   // clickedSumma 方法
   private onClickedSumma() {
@@ -207,51 +253,6 @@ class SummaPanel {
     // 添加统一的鼠标事件监听
     this.mouseEventHandler = this.handleMouseEvent.bind(this);
     document.addEventListener('mousedown', this.mouseEventHandler);
-  }
-
-  // 处理内容
-  private async processContent(): Promise<void> {
-    try {
-      // 显示进度条
-      this.switchContentVisibility(true);
-      // 提取内容
-      this.updateProcess(ProcessStatus.EXTRACTING);
-      await this.extractContent();
-
-      // 总结内容
-      this.updateProcess(ProcessStatus.SUMMARIZING);
-      await this.summarizeContent();
-
-      // 解析总结
-      this.updateProcess(ProcessStatus.PARSING);
-      const html = await this.parseSummary();
-
-      // 显示内容
-      this.switchContentVisibility(false);
-      this.updateSummary(html);
-    } catch (error) {
-      summaErrorLog('处理内容时发生错误:', error);
-    }
-  }
-
-  private async processSummaryOnly(): Promise<void> {
-    try {
-      // 显示进度条
-      this.switchContentVisibility(true);
-      // 总结内容
-      this.updateProcess(ProcessStatus.SUMMARIZING);
-      await this.summarizeContent();
-
-      // 解析总结
-      this.updateProcess(ProcessStatus.PARSING);
-      const html = await this.parseSummary();
-
-      // 显示内容
-      this.switchContentVisibility(false);
-      this.updateSummary(html);
-    } catch (error) {
-      summaErrorLog('处理内容时发生错误:', error);
-    }
   }
 
   // 提取内容
@@ -465,11 +466,13 @@ class SummaPanel {
       });
   }
 
-  private onModelSelect(model: LLMModel): void {
+  private onModelSelect(model: LLMModel) {
     this.currentModel = model;
     StorageService.saveCurrentModel(model);
     this.initModelNameDisplay();
-    this.processSummaryOnly();
+    // 如果内容为空或者内容不存在,需要重新提取内容
+    const shouldExtractContent = !this.content || this.content.length === 0;
+    this.processContent(shouldExtractContent);
   }
 
   private onClose(): void {
