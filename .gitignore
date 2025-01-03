@@ -27,3 +27,7 @@ secrets.*.js
 .env
 .env.local
 .env.*.local
+
+# IDE
+.idea
+.vscode
