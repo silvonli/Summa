@@ -1,11 +1,11 @@
 {
-  "name": "summa",
+  "name": "Summa",
   "version": "1.0.0",
   "description": "提取页面内容并使用 AI 进行总结的 Chrome 插件",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/silvon/summa.git"
+    "url": "https://github.com/silvonli/Summa.git"
   },
   "scripts": {
     "build": "node utils/build.js",
