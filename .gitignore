@@ -30,4 +30,7 @@ secrets.*.js
 
 # IDE
 .idea
-.vscode
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
