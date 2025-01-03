@@ -96,9 +96,9 @@ export const DEFAULT_PROVIDERS: LLMProvider[] = [
     name: 'OpenRouter',
     models: [
       {
-        id: 'google/gemma-2-9b-it:free',
+        id: 'google/gemini-2.0-flash-exp:free',
         provider: 'OPENROUTER',
-        name: 'Google: Gemma 2 9B'
+        name: 'gemini-2.0-flash-exp:free'
       },
       {
         id: 'microsoft/phi-3-medium-128k-instruct:free',
