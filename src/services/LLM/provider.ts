@@ -152,6 +152,7 @@ export const DEFAULT_PROVIDERS: LLMProvider[] = [
   {
     id: 'OPENAI_LIKE',
     name: 'OpenAI Like',
+    apiHost: 'http://example.com',
     models: [],
   },
   {
