@@ -150,6 +150,27 @@ export const DEFAULT_PROVIDERS: LLMProvider[] = [
     ],
   },
   {
+    id: 'SILLICONFLOW',
+    name: '硅基流动',
+    models: [],
+  },
+  {
+    id: 'BAILIAN',
+    name: '阿里云百炼',
+    models: [],
+  },
+  {
+    id: 'TOGETHER',
+    name: 'Together',
+    models: [],
+  },
+  {
+    id: 'HYPERBOLIC',
+    name: 'Hyperbolic',
+    models: [],
+  },
+
+  {
     id: 'OPENAI_LIKE',
     name: 'OpenAI Like',
     apiHost: 'http://example.com',

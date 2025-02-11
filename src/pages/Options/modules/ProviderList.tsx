@@ -13,7 +13,11 @@ const PROVIDER_ICONS: Record<string, string> = {
   MISTRAL: "🌟",
   OPENAI_LIKE: "☁️",
   LMSTUDIO: "🔬",
-  OLLAMA: "🐪"
+  OLLAMA: "🐪",
+  SILLICONFLOW: "🌊",
+  BAILIAN: "💫",
+  TOGETHER: "🤝",
+  HYPERBOLIC: "🔮",
 }
 
 interface ProviderListProps {

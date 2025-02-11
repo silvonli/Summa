@@ -1,4 +1,3 @@
-
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
@@ -90,7 +89,7 @@ export function getOllamaModel(baseURL: string, model: string) {
 
 export function getDeepseekModel(apiKey: OptionalApiKey, model: string) {
   const openai = createOpenAI({
-    baseURL: 'https://api.deepseek.com/beta',
+    baseURL: 'https://api.deepseek.com/v1',
     apiKey,
   });
 
@@ -123,6 +122,42 @@ export function getXAIModel(apiKey: OptionalApiKey, model: string) {
   return openai(model);
 }
 
+export function getBailianModel(apiKey: OptionalApiKey, model: string) {
+  const openai = createOpenAI({
+    baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1/',
+    apiKey,
+  });
+
+  return openai(model);
+}
+
+export function getTogetherModel(apiKey: OptionalApiKey, model: string) {
+  const openai = createOpenAI({
+    baseURL: 'https://api.together.xyz/v1',
+    apiKey,
+  });
+
+  return openai(model);
+}
+
+export function getHyperbolicModel(apiKey: OptionalApiKey, model: string) {
+  const openai = createOpenAI({
+    baseURL: 'https://api.hyperbolic.xyz/v1',
+    apiKey,
+  });
+
+  return openai(model);
+}
+
+export function getSilliconflowModel(apiKey: OptionalApiKey, model: string) {
+  const openai = createOpenAI({
+    baseURL: 'https://api.siliconflow.cn/v1',
+    apiKey,
+  });
+
+  return openai(model);
+}
+
 export function getModel(provider: string, model: string, apiKeys?: Record<string, string>, baseURLs?: Record<string, string>) {
   const apiKey = apiKeys?.[provider] ?? '';
   const baseURL = baseURLs?.[provider] ?? '';
@@ -148,6 +183,15 @@ export function getModel(provider: string, model: string, apiKeys?: Record<strin
       return getLMStudioModel(baseURL, model);
     case 'OLLAMA':
       return getOllamaModel(baseURL, model);
+    case 'SILLICONFLOW':
+      return getSilliconflowModel(apiKey, model);
+    case 'BAILIAN':
+      return getBailianModel(apiKey, model);
+    case 'TOGETHER':
+      return getTogetherModel(apiKey, model);
+    case 'HYPERBOLIC':
+      return getHyperbolicModel(apiKey, model);
+
     // 以下没有提供商没有在设置页面提供
     case 'xAI':
       return getXAIModel(apiKey, model);
