@@ -1,12 +1,12 @@
 import { icons } from '../../../lib/icons';
-import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
 import { LLMModel } from '../../../services/LLM/provider';
+import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
 import { StorageService } from '../../../services/storage';
-import { SummaMenu } from './SummaMenu';
 import htmlTemplate from './SummaPanel.html';
-
+import { SummaMenu } from './SummaMenu';
 import { SummaryModel } from './SummaryModel';
 import { SummaryView, ProcessStatus } from './SummaryView';
+
 
 class SummaPanel {
   private hostNode: HTMLDivElement | null;
@@ -14,10 +14,13 @@ class SummaPanel {
   private currentUrl: string;
   private llmList: LLMModel[];
   private currentLLM: LLMModel | null;
-  private menu: SummaMenu | null;
   private isShow: boolean;
-  private model: SummaryModel | null;
+  private menu: SummaMenu | null;
+
+  private models: SummaryModel[];
+  private currentModelIndex: number;
   private view: SummaryView | null;
+
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
 
   constructor() {
@@ -28,7 +31,8 @@ class SummaPanel {
     this.currentLLM = null;
     this.menu = null;
     this.isShow = false;
-    this.model = null;
+    this.models = [];
+    this.currentModelIndex = -1;
     this.view = null;
     this.mouseEventHandler = null;
   }
@@ -38,7 +42,7 @@ class SummaPanel {
     chrome.runtime.onMessage.addListener(this.handleMessages.bind(this));
   }
 
-  // 懒加载获取模型列表
+  // 懒加载获取LLM列表
   private async getLLMList(): Promise<LLMModel[]> {
     if (this.llmList.length === 0) {
       this.llmList = await StorageService.getModelList();
@@ -46,23 +50,21 @@ class SummaPanel {
     return this.llmList;
   }
 
-  // 确保当前模型
+  // 确保当前LLM有效
   private async ensureCurrentLLM(): Promise<void> {
-    // 确保模型列表已加载
     const llmList = await this.getLLMList();
 
-    // 如果模型列表为空则直接返回
     if (llmList.length === 0) return;
 
     const savedLLM = await StorageService.getCurrentModel();
-    // 如果没有保存的模型,使用第一个模型
+    // 如果没有保存的LLM,使用第一个
     if (!savedLLM) {
       this.currentLLM = llmList[0];
       StorageService.saveCurrentModel(this.currentLLM);
       return;
     }
 
-    // 检查保存的模型是否在当前列表中
+    // 检查保存的LLM是否在当前列表中
     const llmExists = llmList.some(llm =>
       llm.id === savedLLM.id &&
       llm.provider === savedLLM.provider
@@ -92,24 +94,31 @@ class SummaPanel {
   private async renderSummaryContent(): Promise<void> {
     if (!this.shadowRoot) return;
 
-    this.model = new SummaryModel(this.currentLLM, this.currentUrl);
+    // 创建新的实例
+    const newModel = new SummaryModel(this.currentLLM, this.currentUrl);
+    this.models.push(newModel);
+    this.currentModelIndex = this.models.length - 1;
 
     await this.executePipeline();
   }
 
   async executePipeline(): Promise<void> {
-    if (!this.view || !this.model) return;
+    if (!this.view || this.currentModelIndex < 0) return;
+
+    const currentModel = this.models[this.currentModelIndex];
+    if (!currentModel) return;
+
     try {
       this.view.toggleDisplayState(true);
 
       this.view.updateProcess(ProcessStatus.EXTRACTING);
-      await this.model.extractArticle();
+      await currentModel.extractArticle();
 
       this.view.updateProcess(ProcessStatus.SUMMARIZING);
-      await this.model.summarizeArticle();
+      await currentModel.summarizeArticle();
 
       this.view.updateProcess(ProcessStatus.PARSING);
-      const html = await this.model.parseSummary();
+      const html = await currentModel.parseSummary();
 
       this.view.toggleDisplayState(false);
       this.view.updateSummary(html);
@@ -119,9 +128,6 @@ class SummaPanel {
     }
   }
 
-  // getSummary(): string {
-  //   return this.model.getSummary();
-  // }
 
   // 处理点击 Summa 按钮事件
   private async onClickedSumma(): Promise<void> {
@@ -230,7 +236,7 @@ class SummaPanel {
 
     const nameSpan = this.shadowRoot.querySelector<HTMLSpanElement>('.refresh-btn .model-name');
     if (nameSpan) {
-      nameSpan.textContent = this.currentLLM?.name ?? '未选择模型';
+      nameSpan.textContent = this.currentLLM?.name ?? '未选择大语言模型';
     }
   }
 
@@ -282,32 +288,14 @@ class SummaPanel {
     settingsBtn?.addEventListener('click', () => this.onSettings());
   }
 
-  private async onRefresh(event: MouseEvent): Promise<void> {
-    const llmList = await this.getLLMList();
-    if (!this.shadowRoot || llmList.length === 0) return;
-
-    event.stopPropagation();
-
-    // 如果菜单不存在,创建新菜单
-    if (!this.menu) {
-      this.menu = new SummaMenu(
-        this.shadowRoot,
-        llmList,
-        this.onLLMSelect.bind(this)
-      );
-    }
-
-    // 切换菜单显示状态
-    const targetElement = event.currentTarget as HTMLElement;
-    this.menu.isVisible()
-      ? this.menu.hide()
-      : this.menu.show(targetElement);
-  }
-
+  // 复制按钮方法
   private onCopy(): void {
-    if (!this.model) return;
+    if (this.currentModelIndex < 0) return;
 
-    const summary = this.model.getSummary();
+    const currentModel = this.models[this.currentModelIndex];
+    if (!currentModel) return;
+
+    const summary = currentModel.getSummary();
     if (!summary.trim()) return;
 
     navigator.clipboard.writeText(summary)
@@ -323,6 +311,30 @@ class SummaPanel {
       });
   }
 
+  // 刷新按钮方法
+  private async onRefresh(event: MouseEvent): Promise<void> {
+    const llmList = await this.getLLMList();
+    if (!this.shadowRoot || llmList.length === 0) return;
+
+    event.stopPropagation();
+
+    // 创建新菜单
+    if (!this.menu) {
+      this.menu = new SummaMenu(
+        this.shadowRoot,
+        llmList,
+        this.onLLMSelect.bind(this)
+      );
+    }
+
+    // 显示或隐藏菜单
+    const targetElement = event.currentTarget as HTMLElement;
+    this.menu.isVisible()
+      ? this.menu.hide()
+      : this.menu.show(targetElement);
+  }
+
+  // LLM选择方法
   private onLLMSelect(llm: LLMModel) {
     this.currentLLM = llm;
     StorageService.saveCurrentModel(llm);
@@ -330,14 +342,15 @@ class SummaPanel {
     this.renderSummaryContent();
   }
 
+  // 关闭按钮方法
   private onClose(): void {
     this.hide();
   }
 
+  // 设置按钮方法
   private onSettings(): void {
-    // 使用 chrome.runtime.sendMessage 来请求打开选项页面
+    // 使用 chrome.runtime.sendMessage 发送请求打开选项页面
     chrome.runtime.sendMessage({ action: 'openOptionsPage' });
-    // 隐藏当前面板
     this.hide();
   }
 
@@ -353,6 +366,19 @@ class SummaPanel {
 
     if (!isClickInside) {
       this.hide();
+    }
+  }
+
+  // 切换到指定索引的 Model
+  private async switchToModel(index: number): Promise<void> {
+    if (index < 0 || index >= this.models.length || !this.view) return;
+
+    this.currentModelIndex = index;
+    const currentModel = this.models[index];
+
+    if (currentModel) {
+      const html = await currentModel.parseSummary();
+      this.view.updateSummary(html);
     }
   }
 
