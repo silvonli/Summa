@@ -4,25 +4,32 @@ import { LLMModel } from '../../../services/LLM/provider';
 import { StorageService } from '../../../services/storage';
 import { SummaMenu } from './SummaMenu';
 import htmlTemplate from './SummaPanel.html';
-import { SummaryRenderer } from './SummaryRenderer';
 
+import { SummaryModel } from './SummaryModel';
+import { SummaryView, ProcessStatus } from './SummaryView';
 
 class SummaPanel {
   private hostNode: HTMLDivElement | null;
   private shadowRoot: ShadowRoot | null;
   private currentUrl: string;
+  private llmList: LLMModel[];
+  private currentLLM: LLMModel | null;
+  private menu: SummaMenu | null;
+  private isShow: boolean;
+  private model: SummaryModel | null;
+  private view: SummaryView | null;
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
-  private llmList: LLMModel[] = [];
-  private currentLLM: LLMModel | null = null;
-  private menu: SummaMenu | null = null;
-  private contentRender: SummaryRenderer | null = null;
-  private isShow: boolean = false;
 
   constructor() {
     this.hostNode = null;
     this.shadowRoot = null;
     this.currentUrl = '';
+    this.llmList = [];
+    this.currentLLM = null;
+    this.menu = null;
     this.isShow = false;
+    this.model = null;
+    this.view = null;
     this.mouseEventHandler = null;
   }
 
@@ -85,17 +92,36 @@ class SummaPanel {
   private async renderSummaryContent(): Promise<void> {
     if (!this.shadowRoot) return;
 
-    const contentElement = this.shadowRoot.querySelector('.content');
-    if (!contentElement) return;
+    this.model = new SummaryModel(this.currentLLM, this.currentUrl);
 
-    this.contentRender = new SummaryRenderer(
-      contentElement as HTMLElement,
-      this.currentLLM,
-      this.currentUrl
-    );
-
-    await this.contentRender.executePipeline();
+    await this.executePipeline();
   }
+
+  async executePipeline(): Promise<void> {
+    if (!this.view || !this.model) return;
+    try {
+      this.view.toggleDisplayState(true);
+
+      this.view.updateProcess(ProcessStatus.EXTRACTING);
+      await this.model.extractArticle();
+
+      this.view.updateProcess(ProcessStatus.SUMMARIZING);
+      await this.model.summarizeArticle();
+
+      this.view.updateProcess(ProcessStatus.PARSING);
+      const html = await this.model.parseSummary();
+
+      this.view.toggleDisplayState(false);
+      this.view.updateSummary(html);
+
+    } catch (error) {
+      summaErrorLog('内容生成错误:', error);
+    }
+  }
+
+  // getSummary(): string {
+  //   return this.model.getSummary();
+  // }
 
   // 处理点击 Summa 按钮事件
   private async onClickedSumma(): Promise<void> {
@@ -154,6 +180,7 @@ class SummaPanel {
       this.initializeIcons();
       await this.ensureCurrentLLM();
       this.initLLMNameDisplay();
+      this.initSummaryView();
     } catch (error) {
       summaErrorLog('注入失败:', error);
     }
@@ -207,6 +234,14 @@ class SummaPanel {
     }
   }
 
+  private initSummaryView(): void {
+    if (!this.shadowRoot) return;
+
+    const contentElement = this.shadowRoot.querySelector('.content');
+    if (!contentElement) return;
+
+    this.view = new SummaryView(contentElement as HTMLElement);
+  }
 
   // remove 方法
   private remove(): void {
@@ -270,9 +305,9 @@ class SummaPanel {
   }
 
   private onCopy(): void {
-    if (!this.contentRender) return;
+    if (!this.model) return;
 
-    const summary = this.contentRender.getSummary();
+    const summary = this.model.getSummary();
     if (!summary.trim()) return;
 
     navigator.clipboard.writeText(summary)
