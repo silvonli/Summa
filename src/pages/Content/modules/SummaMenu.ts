@@ -1,30 +1,30 @@
 import { LLMModel } from '../../../services/LLM/provider';
 
-export class ModelMenu {
+export class SummaMenu {
   private menuElement: HTMLElement;
   private shadowRoot: ShadowRoot;
-  private onModelSelect: (model: LLMModel) => void;
+  private onLLMSelect: (llm: LLMModel) => void;
 
-  constructor(shadowRoot: ShadowRoot, models: LLMModel[], onModelSelect: (model: LLMModel) => void) {
+  constructor(shadowRoot: ShadowRoot, llms: LLMModel[], onLLMSelect: (llm: LLMModel) => void) {
     this.shadowRoot = shadowRoot;
-    this.onModelSelect = onModelSelect;
+    this.onLLMSelect = onLLMSelect;
 
     // 创建菜单元素
     this.menuElement = document.createElement('div');
-    this.menuElement.className = 'model-menu';
-    this.initializeMenu(models);
+    this.menuElement.className = 'llm-menu';
+    this.initializeMenu(llms);
   }
 
-  private initializeMenu(models: LLMModel[]): void {
+  private initializeMenu(llms: LLMModel[]): void {
     // 创建菜单项
-    models.forEach(model => {
+    llms.forEach(llm => {
       const item = document.createElement('div');
-      item.className = 'model-menu-item';
-      item.textContent = model.name;
+      item.className = 'llm-menu-item';
+      item.textContent = llm.name;
 
       item.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.onModelSelect(model);
+        this.onLLMSelect(llm);
         this.hide();
       });
 

@@ -1,4 +1,4 @@
-.model-menu {
+.llm-menu {
   position: absolute;
   background: var(--summa-white);
   border: 1px solid var(--summa-border);
@@ -12,12 +12,12 @@
   transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-.model-menu.show {
+.llm-menu.show {
   opacity: 1;
   visibility: visible;
 }
 
-.model-menu-item {
+.llm-menu-item {
   padding: var(--spacing-sm);
   border-radius: var(--menu-item-radius);
   cursor: pointer;
@@ -26,6 +26,6 @@
   transition: background-color 0.2s ease;
 }
 
-.model-menu-item:hover {
+.llm-menu-item:hover {
   background-color: var(--menu-item-hover-bg);
 }

@@ -2,7 +2,7 @@ import { icons } from '../../../lib/icons';
 import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
 import { LLMModel } from '../../../services/LLM/provider';
 import { StorageService } from '../../../services/storage';
-import { ModelMenu } from './ModelMenu';
+import { SummaMenu } from './SummaMenu';
 import htmlTemplate from './SummaPanel.html';
 import { SummaryRenderer } from './SummaryRenderer';
 
@@ -14,7 +14,7 @@ class SummaPanel {
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
   private llmList: LLMModel[] = [];
   private currentLLM: LLMModel | null = null;
-  private menu: ModelMenu | null = null;
+  private menu: SummaMenu | null = null;
   private contentRender: SummaryRenderer | null = null;
   private isShow: boolean = false;
 
@@ -255,7 +255,7 @@ class SummaPanel {
 
     // 如果菜单不存在,创建新菜单
     if (!this.menu) {
-      this.menu = new ModelMenu(
+      this.menu = new SummaMenu(
         this.shadowRoot,
         llmList,
         this.onLLMSelect.bind(this)
