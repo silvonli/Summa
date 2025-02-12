@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.runtime.openOptionsPage();
   }
 
-  if (request.action === 'extractContent') {
+  if (request.action === 'extractArticle') {
     handleExtract(request.data.html)
       .then(content => {
         sendResponse({ data: content });

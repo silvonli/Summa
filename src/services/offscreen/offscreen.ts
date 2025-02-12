@@ -24,7 +24,7 @@ const initTurndownService = () => {
   return turndownService;
 };
 
-const extractContent = async (html: string): Promise<string> => {
+const extractArticle = async (html: string): Promise<string> => {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
@@ -67,7 +67,7 @@ const extractContent = async (html: string): Promise<string> => {
 // 监听来自 Service Worker 的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'OFFSCREEN_EXTRACT_MARKDOWN') {
-    extractContent(message.html)
+    extractArticle(message.html)
       .then(markdown => {
         sendResponse({ success: true, markdown });
       })

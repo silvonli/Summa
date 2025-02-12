@@ -16,7 +16,7 @@ class SummaPanel {
   private hostNode: HTMLDivElement | null;
   private shadowRoot: ShadowRoot | null;
   private isShow: boolean;
-  private content: string;
+  private article: string;
   private summary: string;
   private currentUrl: string;
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
@@ -29,7 +29,7 @@ class SummaPanel {
     this.hostNode = null;
     this.shadowRoot = null;
     this.isShow = false;
-    this.content = '';
+    this.article = '';
     this.summary = '';
     this.currentUrl = '';
     this.mouseEventHandler = null;
@@ -108,21 +108,21 @@ class SummaPanel {
     const steps = [
       {
         status: ProcessStatus.EXTRACTING,
-        pending: newStatus < ProcessStatus.EXTRACTING ? '等待提取..' :
-          newStatus === ProcessStatus.EXTRACTING ? '正在提取内容...' :
-            '完成内容提取.',
+        pending: newStatus < ProcessStatus.EXTRACTING ? '等待提取正文...' :
+          newStatus === ProcessStatus.EXTRACTING ? '正在提取正文...' :
+            '完成正文提取.',
       },
       {
         status: ProcessStatus.SUMMARIZING,
-        pending: newStatus < ProcessStatus.SUMMARIZING ? '等待总结..' :
-          newStatus === ProcessStatus.SUMMARIZING ? '正在总结内容...' :
-            '完成内容总结.',
+        pending: newStatus < ProcessStatus.SUMMARIZING ? '等待总结...' :
+          newStatus === ProcessStatus.SUMMARIZING ? '正在总结...' :
+            '完成总结.',
       },
       {
         status: ProcessStatus.PARSING,
-        pending: newStatus < ProcessStatus.PARSING ? '等待解析..' :
-          newStatus === ProcessStatus.PARSING ? '正在解析文本...' :
-            '完成文本解析.',
+        pending: newStatus < ProcessStatus.PARSING ? '等待解析...' :
+          newStatus === ProcessStatus.PARSING ? '正在解析...' :
+            '完成解析.',
       },
     ];
 
@@ -160,8 +160,8 @@ class SummaPanel {
     markdownBody.innerHTML = html;
   }
 
-  // 处理内容
-  private async processContent(shouldExtractContent: boolean = true): Promise<void> {
+  // 处理正文
+  private async handleArticle(shouldExtractArticle: boolean = true): Promise<void> {
     try {
       // 生成新的请求ID
       const requestId = Date.now().toString();
@@ -171,16 +171,16 @@ class SummaPanel {
       this.switchContentVisibility(true);
 
       // 提取正文
-      if (shouldExtractContent) {
+      if (shouldExtractArticle) {
         this.updateProcess(ProcessStatus.EXTRACTING);
-        await this.extractContent();
+        await this.extractArticle();
         if (this.checkRequestCancelled(requestId)) return;
       }
 
       this.updateProcess(ProcessStatus.SUMMARIZING);
 
       // 生成总结
-      await this.summarizeContent();
+      await this.summarizeArticle();
       if (this.checkRequestCancelled(requestId)) return;
 
       this.updateProcess(ProcessStatus.PARSING);
@@ -194,7 +194,7 @@ class SummaPanel {
       this.updateSummary(html);
 
     } catch (error) {
-      summaErrorLog('处理内容时发生错误:', error);
+      summaErrorLog('发生错误:', error);
     }
   }
 
@@ -214,7 +214,7 @@ class SummaPanel {
       this.currentUrl = newUrl;
       this.inject();
       this.show();
-      this.processContent();
+      this.handleArticle();
       return;
     }
 
@@ -222,7 +222,7 @@ class SummaPanel {
     if (this.currentUrl !== newUrl) {
       this.currentUrl = newUrl;
       this.show();
-      this.processContent();
+      this.handleArticle();
       return;
     }
 
@@ -252,15 +252,15 @@ class SummaPanel {
     document.addEventListener('mousedown', this.mouseEventHandler);
   }
 
-  // 提取内容
-  private async extractContent(): Promise<void> {
+  // 提取正文
+  private async extractArticle(): Promise<void> {
     try {
-      summaDebugLog('SummaPanel: 开始提取页面内容');
+      summaDebugLog('SummaPanel: 开始提取页面正文');
 
-      // 发送消息给 background 进行内容提取
+      // 发送消息给 background 进行正文提取
       const docHtml = document.documentElement.outerHTML;
       const response = await chrome.runtime.sendMessage({
-        action: 'extractContent',
+        action: 'extractArticle',
         data: {
           html: docHtml,
           url: this.currentUrl
@@ -268,27 +268,27 @@ class SummaPanel {
       });
 
       if (response.error) {
-        summaDebugLog('SummaPanel: 内容提取失败', { error: response.error });
+        summaDebugLog('SummaPanel: 正文提取失败', { error: response.error });
         return;
       }
 
-      this.content = response.data;
+      this.article = response.data;
 
     } catch (error) {
-      summaErrorLog('SummaPanel: 提取页面内容时发生错误', error);
+      summaErrorLog('SummaPanel: 提取页面正文时发生错误', error);
     }
   }
 
-  // 总结内容
-  private async summarizeContent(): Promise<void> {
+  // 总结正文
+  private async summarizeArticle(): Promise<void> {
     const currentModel = await this.getCurrentModel();
     if (!currentModel) {
       this.summary = '### 错误\n\n模型未配置';
       return;
     }
 
-    if (!this.content) {
-      this.summary = '### 错误\n\n无法提取页面内容';
+    if (!this.article) {
+      this.summary = '### 错误\n\n无法提取页面正文';
       return;
     }
 
@@ -298,7 +298,7 @@ class SummaPanel {
         action: 'summarize',
         data: {
           model: currentModel,
-          content: this.content,
+          content: this.article,
           url: this.currentUrl
         }
       });
@@ -344,7 +344,7 @@ class SummaPanel {
       // 先添加样式表
       this.shadowRoot.appendChild(styleSheet);
 
-      // 再添加 HTML 内容
+      // 添加 HTML 
       this.shadowRoot.innerHTML += htmlTemplate;
 
       document.body.appendChild(this.hostNode);
@@ -467,9 +467,9 @@ class SummaPanel {
     this.currentModel = model;
     StorageService.saveCurrentModel(model);
     this.initModelNameDisplay();
-    // 如果内容为空或者内容不存在,需要重新提取内容
-    const shouldExtractContent = !this.content || this.content.length === 0;
-    this.processContent(shouldExtractContent);
+    // 如果正文为空或者正文不存在,需要重新提取
+    const shouldExtractArticle = !this.article || this.article.length === 0;
+    this.handleArticle(shouldExtractArticle);
   }
 
   private onClose(): void {
