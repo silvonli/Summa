@@ -12,9 +12,9 @@ class SummaPanel {
   private shadowRoot: ShadowRoot | null;
   private currentUrl: string;
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
-  private modelList: LLMModel[] = [];
-  private currentModel: LLMModel | null = null;
-  private currentMenu: ModelMenu | null = null;
+  private llmList: LLMModel[] = [];
+  private currentLLM: LLMModel | null = null;
+  private menu: ModelMenu | null = null;
   private contentRender: SummaryRenderer | null = null;
   private isShow: boolean = false;
 
@@ -32,40 +32,40 @@ class SummaPanel {
   }
 
   // 懒加载获取模型列表
-  private async getModelList(): Promise<LLMModel[]> {
-    if (this.modelList.length === 0) {
-      this.modelList = await StorageService.getModelList();
+  private async getLLMList(): Promise<LLMModel[]> {
+    if (this.llmList.length === 0) {
+      this.llmList = await StorageService.getModelList();
     }
-    return this.modelList;
+    return this.llmList;
   }
 
-  // 初始化当前模型
-  private async initializeCurrentModel(): Promise<void> {
+  // 确保当前模型
+  private async ensureCurrentLLM(): Promise<void> {
     // 确保模型列表已加载
-    const modelList = await this.getModelList();
+    const llmList = await this.getLLMList();
 
     // 如果模型列表为空则直接返回
-    if (modelList.length === 0) return;
+    if (llmList.length === 0) return;
 
-    const savedModel = await StorageService.getCurrentModel();
+    const savedLLM = await StorageService.getCurrentModel();
     // 如果没有保存的模型,使用第一个模型
-    if (!savedModel) {
-      this.currentModel = modelList[0];
-      StorageService.saveCurrentModel(this.currentModel);
+    if (!savedLLM) {
+      this.currentLLM = llmList[0];
+      StorageService.saveCurrentModel(this.currentLLM);
       return;
     }
 
     // 检查保存的模型是否在当前列表中
-    const modelExists = modelList.some(model =>
-      model.id === savedModel.id &&
-      model.provider === savedModel.provider
+    const llmExists = llmList.some(llm =>
+      llm.id === savedLLM.id &&
+      llm.provider === savedLLM.provider
     );
 
-    if (modelExists) {
-      this.currentModel = savedModel;
+    if (llmExists) {
+      this.currentLLM = savedLLM;
     } else {
-      this.currentModel = modelList[0];
-      StorageService.saveCurrentModel(this.currentModel);
+      this.currentLLM = llmList[0];
+      StorageService.saveCurrentModel(this.currentLLM);
     }
   }
 
@@ -90,7 +90,7 @@ class SummaPanel {
 
     this.contentRender = new SummaryRenderer(
       contentElement as HTMLElement,
-      this.currentModel,
+      this.currentLLM,
       this.currentUrl
     );
 
@@ -152,8 +152,8 @@ class SummaPanel {
 
       this.bindEvents();
       this.initializeIcons();
-      await this.initializeCurrentModel();
-      this.initModelNameDisplay();
+      await this.ensureCurrentLLM();
+      this.initLLMNameDisplay();
     } catch (error) {
       summaErrorLog('注入失败:', error);
     }
@@ -198,12 +198,12 @@ class SummaPanel {
     });
   }
 
-  private initModelNameDisplay(): void {
+  private initLLMNameDisplay(): void {
     if (!this.shadowRoot) return;
 
-    const modelNameSpan = this.shadowRoot.querySelector<HTMLSpanElement>('.refresh-btn .model-name');
-    if (modelNameSpan) {
-      modelNameSpan.textContent = this.currentModel?.name ?? '未选择模型';
+    const nameSpan = this.shadowRoot.querySelector<HTMLSpanElement>('.refresh-btn .model-name');
+    if (nameSpan) {
+      nameSpan.textContent = this.currentLLM?.name ?? '未选择模型';
     }
   }
 
@@ -248,25 +248,25 @@ class SummaPanel {
   }
 
   private async onRefresh(event: MouseEvent): Promise<void> {
-    const modelList = await this.getModelList();
-    if (!this.shadowRoot || modelList.length === 0) return;
+    const llmList = await this.getLLMList();
+    if (!this.shadowRoot || llmList.length === 0) return;
 
     event.stopPropagation();
 
     // 如果菜单不存在,创建新菜单
-    if (!this.currentMenu) {
-      this.currentMenu = new ModelMenu(
+    if (!this.menu) {
+      this.menu = new ModelMenu(
         this.shadowRoot,
-        modelList,
-        this.onModelSelect.bind(this)
+        llmList,
+        this.onLLMSelect.bind(this)
       );
     }
 
     // 切换菜单显示状态
     const targetElement = event.currentTarget as HTMLElement;
-    this.currentMenu.isVisible()
-      ? this.currentMenu.hide()
-      : this.currentMenu.show(targetElement);
+    this.menu.isVisible()
+      ? this.menu.hide()
+      : this.menu.show(targetElement);
   }
 
   private onCopy(): void {
@@ -288,10 +288,10 @@ class SummaPanel {
       });
   }
 
-  private onModelSelect(model: LLMModel) {
-    this.currentModel = model;
-    StorageService.saveCurrentModel(model);
-    this.initModelNameDisplay();
+  private onLLMSelect(llm: LLMModel) {
+    this.currentLLM = llm;
+    StorageService.saveCurrentModel(llm);
+    this.initLLMNameDisplay();
     this.renderSummaryContent();
   }
 
