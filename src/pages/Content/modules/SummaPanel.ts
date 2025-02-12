@@ -159,43 +159,37 @@ class SummaPanel {
 
     markdownBody.innerHTML = html;
   }
+
   // 处理内容
   private async processContent(shouldExtractContent: boolean = true): Promise<void> {
     try {
       // 生成新的请求ID
       const requestId = Date.now().toString();
       this.currentRequestId = requestId;
-      // 显示进度条
+
+      // 切换到显示进度条
       this.switchContentVisibility(true);
 
-      // 检查请求是否被取消
-      const isRequestCancelled = () => {
-        if (this.currentRequestId !== requestId) {
-          summaDebugLog('processContent: 检测到新请求，终止当前处理');
-          return true;
-        }
-        return false;
-      };
-
-      // 提取内容
+      // 提取正文
       if (shouldExtractContent) {
-        // 提取内容
         this.updateProcess(ProcessStatus.EXTRACTING);
         await this.extractContent();
-        if (isRequestCancelled()) return;
+        if (this.checkRequestCancelled(requestId)) return;
       }
 
-      // 总结内容
       this.updateProcess(ProcessStatus.SUMMARIZING);
+
+      // 生成总结
       await this.summarizeContent();
-      if (isRequestCancelled()) return;
+      if (this.checkRequestCancelled(requestId)) return;
+
+      this.updateProcess(ProcessStatus.PARSING);
 
       // 解析总结
-      this.updateProcess(ProcessStatus.PARSING);
       const html = await this.parseSummary();
-      if (isRequestCancelled()) return;
+      if (this.checkRequestCancelled(requestId)) return;
 
-      // 显示内容
+      // 切换到显示总结
       this.switchContentVisibility(false);
       this.updateSummary(html);
 
@@ -203,6 +197,7 @@ class SummaPanel {
       summaErrorLog('处理内容时发生错误:', error);
     }
   }
+
 
   // clickedSumma 方法
   private onClickedSumma() {
@@ -508,6 +503,19 @@ class SummaPanel {
     if (!isClickInside) {
       this.hide();
     }
+  }
+
+  /**
+   * 检查当前请求是否已被新请求取代
+   * @param requestId 当前处理的请求ID
+   * @returns 是否已被取消
+   */
+  private checkRequestCancelled(requestId: string): boolean {
+    if (this.currentRequestId !== requestId) {
+      summaDebugLog('checkRequestCancelled: 检测到新请求，终止当前处理');
+      return true;
+    }
+    return false;
   }
 
 }
