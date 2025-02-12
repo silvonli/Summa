@@ -1,39 +1,29 @@
-import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
-import htmlTemplate from './SummaPanel.html';
-import { marked } from 'marked';
 import { icons } from '../../../lib/icons';
+import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
 import { LLMModel } from '../../../services/LLM/provider';
-import { ModelMenu } from './ModelMenu';
 import { StorageService } from '../../../services/storage';
-// 进度状态 
-enum ProcessStatus {
-  EXTRACTING = 0,
-  SUMMARIZING = 1,
-  PARSING = 2
-}
+import { ModelMenu } from './ModelMenu';
+import htmlTemplate from './SummaPanel.html';
+import { SummaryRenderer } from './SummaryRenderer';
+
 
 class SummaPanel {
   private hostNode: HTMLDivElement | null;
   private shadowRoot: ShadowRoot | null;
-  private isShow: boolean;
-  private article: string;
-  private summary: string;
   private currentUrl: string;
   private mouseEventHandler: ((event: MouseEvent) => void) | null;
-  private currentModel: LLMModel | null = null;
   private modelList: LLMModel[] = [];
+  private currentModel: LLMModel | null = null;
   private currentMenu: ModelMenu | null = null;
-  private currentRequestId: string;
+  private contentRender: SummaryRenderer | null = null;
+  private isShow: boolean = false;
 
   constructor() {
     this.hostNode = null;
     this.shadowRoot = null;
-    this.isShow = false;
-    this.article = '';
-    this.summary = '';
     this.currentUrl = '';
+    this.isShow = false;
     this.mouseEventHandler = null;
-    this.currentRequestId = '';
   }
 
   async init(): Promise<void> {
@@ -47,14 +37,6 @@ class SummaPanel {
       this.modelList = await StorageService.getModelList();
     }
     return this.modelList;
-  }
-
-  // 懒加载获取当前模型
-  private async getCurrentModel(): Promise<LLMModel | null> {
-    if (!this.currentModel) {
-      await this.initializeCurrentModel();
-    }
-    return this.currentModel;
   }
 
   // 初始化当前模型
@@ -87,6 +69,7 @@ class SummaPanel {
     }
   }
 
+
   private handleMessages(
     request: { action: string },
     sender: chrome.runtime.MessageSender,
@@ -98,240 +81,58 @@ class SummaPanel {
     }
   }
 
-  // 更新进度显示
-  private updateProcess(newStatus: ProcessStatus): void {
+  // 渲染总结内容
+  private async renderSummaryContent(): Promise<void> {
     if (!this.shadowRoot) return;
 
-    const progress = this.shadowRoot.querySelector('.progress');
-    if (!progress) return;
+    const contentElement = this.shadowRoot.querySelector('.content');
+    if (!contentElement) return;
 
-    const steps = [
-      {
-        status: ProcessStatus.EXTRACTING,
-        pending: newStatus < ProcessStatus.EXTRACTING ? '等待提取正文...' :
-          newStatus === ProcessStatus.EXTRACTING ? '正在提取正文...' :
-            '完成正文提取.',
-      },
-      {
-        status: ProcessStatus.SUMMARIZING,
-        pending: newStatus < ProcessStatus.SUMMARIZING ? '等待总结...' :
-          newStatus === ProcessStatus.SUMMARIZING ? '正在总结...' :
-            '完成总结.',
-      },
-      {
-        status: ProcessStatus.PARSING,
-        pending: newStatus < ProcessStatus.PARSING ? '等待解析...' :
-          newStatus === ProcessStatus.PARSING ? '正在解析...' :
-            '完成解析.',
-      },
-    ];
+    this.contentRender = new SummaryRenderer(
+      contentElement as HTMLElement,
+      this.currentModel,
+      this.currentUrl
+    );
 
-    const getStepHtml = (step: {
-      status: ProcessStatus;
-      pending: string;
-    }) => {
-      const isPending = step.status >= newStatus;
-      const icon = isPending ? icons.spinner : icons.check;
-      const stepClass = isPending ? 'step pending' : 'step';
-      const text = step.pending;
-
-      return `
-        <div class="${stepClass}">
-          <span>${icon}</span>
-          ${text}
-        </div>
-      `;
-    };
-
-    progress.innerHTML = `
-      <div class="steps">
-        ${steps.map(getStepHtml).join('')}
-      </div>
-    `;
+    await this.contentRender.executePipeline();
   }
 
-  // 更新总结显示
-  private updateSummary(html: string): void {
-    if (!this.shadowRoot) return;
+  // 处理点击 Summa 按钮事件
+  private async onClickedSumma(): Promise<void> {
+    const currentPageUrl = window.location.href;
 
-    const markdownBody = this.shadowRoot.querySelector('.markdown-body');
-    if (!markdownBody) return;
-
-    markdownBody.innerHTML = html;
-  }
-
-  // 处理正文
-  private async handleArticle(shouldExtractArticle: boolean = true): Promise<void> {
-    try {
-      // 生成新的请求ID
-      const requestId = Date.now().toString();
-      this.currentRequestId = requestId;
-
-      // 切换到显示进度条
-      this.switchContentVisibility(true);
-
-      // 提取正文
-      if (shouldExtractArticle) {
-        this.updateProcess(ProcessStatus.EXTRACTING);
-        await this.extractArticle();
-        if (this.checkRequestCancelled(requestId)) return;
-      }
-
-      this.updateProcess(ProcessStatus.SUMMARIZING);
-
-      // 生成总结
-      await this.summarizeArticle();
-      if (this.checkRequestCancelled(requestId)) return;
-
-      this.updateProcess(ProcessStatus.PARSING);
-
-      // 解析总结
-      const html = await this.parseSummary();
-      if (this.checkRequestCancelled(requestId)) return;
-
-      // 切换到显示总结
-      this.switchContentVisibility(false);
-      this.updateSummary(html);
-
-    } catch (error) {
-      summaErrorLog('发生错误:', error);
+    // 首次初始化场景
+    if (!this.hostNode) {
+      this.currentUrl = currentPageUrl;
+      await this.inject();
+      this.show();
+      this.renderSummaryContent();
+      return;
     }
-  }
 
-
-  // clickedSumma 方法
-  private onClickedSumma() {
-    // 如果已经显示,直接隐藏
+    // 已显示时直接隐藏并返回
     if (this.isShow) {
       this.hide();
       return;
     }
 
-    const newUrl = window.location.href;
-
-    // 如果没有宿主节点，需要初始化
-    if (!this.hostNode) {
-      this.currentUrl = newUrl;
-      this.inject();
+    // URL 发生变化时需要重新渲染
+    const isUrlChanged = this.currentUrl !== currentPageUrl;
+    if (isUrlChanged) {
+      this.currentUrl = currentPageUrl;
       this.show();
-      this.handleArticle();
+      this.renderSummaryContent();
       return;
     }
 
-    // 如果 URL 发生变化，需要重新处理
-    if (this.currentUrl !== newUrl) {
-      this.currentUrl = newUrl;
-      this.show();
-      this.handleArticle();
-      return;
-    }
-
-    // URL 没有变化，直接显示
+    // 统一显示逻辑
     this.show();
+
   }
 
-  // 隐藏界面
-  private hide(): void {
-    this.isShow = false;
-    this.shadowRoot?.querySelector('.panel')?.classList.add('hidden');
-
-    // 移除事件监听
-    if (this.mouseEventHandler) {
-      document.removeEventListener('mousedown', this.mouseEventHandler);
-      this.mouseEventHandler = null;
-    }
-  }
-
-  // 显示界面
-  private show(): void {
-    this.isShow = true;
-    this.shadowRoot?.querySelector('.panel')?.classList.remove('hidden');
-
-    // 添加统一的鼠标事件监听
-    this.mouseEventHandler = this.handleMouseEvent.bind(this);
-    document.addEventListener('mousedown', this.mouseEventHandler);
-  }
-
-  // 提取正文
-  private async extractArticle(): Promise<void> {
-    try {
-      summaDebugLog('SummaPanel: 开始提取页面正文');
-
-      // 发送消息给 background 进行正文提取
-      const docHtml = document.documentElement.outerHTML;
-      const response = await chrome.runtime.sendMessage({
-        action: 'extractArticle',
-        data: {
-          html: docHtml,
-          url: this.currentUrl
-        }
-      });
-
-      if (response.error) {
-        summaDebugLog('SummaPanel: 正文提取失败', { error: response.error });
-        return;
-      }
-
-      this.article = response.data;
-
-    } catch (error) {
-      summaErrorLog('SummaPanel: 提取页面正文时发生错误', error);
-    }
-  }
-
-  // 总结正文
-  private async summarizeArticle(): Promise<void> {
-    const currentModel = await this.getCurrentModel();
-    if (!currentModel) {
-      this.summary = '### 错误\n\n模型未配置';
-      return;
-    }
-
-    if (!this.article) {
-      this.summary = '### 错误\n\n无法提取页面正文';
-      return;
-    }
-
-    try {
-      this.summary = '';
-      const response = await chrome.runtime.sendMessage({
-        action: 'summarize',
-        data: {
-          model: currentModel,
-          content: this.article,
-          url: this.currentUrl
-        }
-      });
-
-      if (response.error) {
-        this.summary = `### 错误\n\n总结时发生错误: ${response.error}`;
-      } else {
-        this.summary = response.data || '### 错误\n\大语言模型返回的总结为空';
-      }
-    } catch (error) {
-      summaErrorLog('总结时发生错误:', error);
-      this.summary = `### 错误\n\n总结时发生错误: ${error as Error}`;
-    }
-  }
-
-  // 解析总结
-  private async parseSummary(): Promise<string> {
-    if (!this.summary) {
-      return '';
-    }
-
-    marked.use({
-      async: false,
-      pedantic: false,
-      gfm: true,
-    });
-
-    const html = marked.parse(this.summary) as string;
-    return html;
-  }
 
   // 注入页面
-  private inject(): void {
+  private async inject(): Promise<void> {
     try {
       this.hostNode = document.createElement('div');
       this.shadowRoot = this.hostNode.attachShadow({ mode: 'open' });
@@ -351,9 +152,32 @@ class SummaPanel {
 
       this.bindEvents();
       this.initializeIcons();
+      await this.initializeCurrentModel();
       this.initModelNameDisplay();
     } catch (error) {
       summaErrorLog('注入失败:', error);
+    }
+  }
+
+  // 显示界面
+  private show(): void {
+    this.isShow = true;
+    this.shadowRoot?.querySelector('.panel')?.classList.remove('hidden');
+
+    // 添加统一的鼠标事件监听
+    this.mouseEventHandler = this.handleMouseEvent.bind(this);
+    document.addEventListener('mousedown', this.mouseEventHandler);
+  }
+
+  // 隐藏界面
+  private hide(): void {
+    this.isShow = false;
+    this.shadowRoot?.querySelector('.panel')?.classList.add('hidden');
+
+    // 移除事件监听
+    if (this.mouseEventHandler) {
+      document.removeEventListener('mousedown', this.mouseEventHandler);
+      this.mouseEventHandler = null;
     }
   }
 
@@ -374,13 +198,12 @@ class SummaPanel {
     });
   }
 
-  private async initModelNameDisplay(): Promise<void> {
+  private initModelNameDisplay(): void {
     if (!this.shadowRoot) return;
 
-    const currentModel = await this.getCurrentModel();
     const modelNameSpan = this.shadowRoot.querySelector<HTMLSpanElement>('.refresh-btn .model-name');
     if (modelNameSpan) {
-      modelNameSpan.textContent = currentModel?.name ?? '未选择模型';
+      modelNameSpan.textContent = this.currentModel?.name ?? '未选择模型';
     }
   }
 
@@ -447,10 +270,12 @@ class SummaPanel {
   }
 
   private onCopy(): void {
-    if (!this.shadowRoot || this.summary.trim() === '') return;
+    if (!this.contentRender) return;
 
-    // 复制到剪贴板
-    navigator.clipboard.writeText(this.summary)
+    const summary = this.contentRender.getSummary();
+    if (!summary.trim()) return;
+
+    navigator.clipboard.writeText(summary)
       .then(() => {
         const copyBtn = this.shadowRoot?.querySelector('.copy-btn');
         if (!copyBtn) return;
@@ -467,9 +292,7 @@ class SummaPanel {
     this.currentModel = model;
     StorageService.saveCurrentModel(model);
     this.initModelNameDisplay();
-    // 如果正文为空或者正文不存在,需要重新提取
-    const shouldExtractArticle = !this.article || this.article.length === 0;
-    this.handleArticle(shouldExtractArticle);
+    this.renderSummaryContent();
   }
 
   private onClose(): void {
@@ -483,13 +306,6 @@ class SummaPanel {
     this.hide();
   }
 
-  // 切换内容区域的显示内容
-  private switchContentVisibility(showProgress: boolean): void {
-    if (!this.shadowRoot) return;
-
-    this.shadowRoot.querySelector('.progress')?.classList.toggle('content-hidden', !showProgress);
-    this.shadowRoot.querySelector('.markdown-body')?.classList.toggle('content-hidden', showProgress);
-  }
 
   // 处理所有鼠标事件
   private handleMouseEvent(event: MouseEvent): void {
@@ -503,19 +319,6 @@ class SummaPanel {
     if (!isClickInside) {
       this.hide();
     }
-  }
-
-  /**
-   * 检查当前请求是否已被新请求取代
-   * @param requestId 当前处理的请求ID
-   * @returns 是否已被取消
-   */
-  private checkRequestCancelled(requestId: string): boolean {
-    if (this.currentRequestId !== requestId) {
-      summaDebugLog('checkRequestCancelled: 检测到新请求，终止当前处理');
-      return true;
-    }
-    return false;
   }
 
 }
