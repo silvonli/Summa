@@ -1,3 +1,4 @@
+/* 主面板样式 */
 .panel {
   position: fixed;
   top: 20px;
@@ -10,8 +11,6 @@
   box-shadow: var(--summa-shadow);
   z-index: 2147483646;
   overflow: hidden;
-
-  /* 优化动画效果 */
   opacity: 1;
   transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -21,6 +20,7 @@
   pointer-events: none;
 }
 
+/* 头部区域样式 */
 .header {
   position: relative;
   display: flex;
@@ -49,6 +49,7 @@
   flex-shrink: 0;
 }
 
+/* 内容区域样式 */
 .content {
   position: relative;
   height: calc(80vh - var(--header-height));
@@ -58,6 +59,12 @@
   z-index: 1;
 }
 
+.content-hidden {
+  display: none !important;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
 .markdown-body {
   box-sizing: border-box;
   margin: 0 auto;
@@ -65,6 +72,7 @@
   min-height: 100%;
 }
 
+/* 滚动条样式 */
 .content::-webkit-scrollbar {
   width: var(--scrollbar-width);
 }
@@ -83,6 +91,7 @@
   background-color: var(--summa-text-secondary);
 }
 
+/* 进度条样式 */
 .progress {
   position: relative;
   display: flex;
@@ -120,6 +129,7 @@
   color: var(--progress-text-pending);
 }
 
+/* 加载动画样式 */
 .spinner {
   width: 20px;
   height: 20px;
@@ -152,14 +162,7 @@
   }
 }
 
-
-.content-hidden {
-  display: none !important;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-
+/* 按钮通用样式 */
 .button {
   display: flex;
   align-items: center;
@@ -172,6 +175,7 @@
   border-radius: var(--button-radius);
   color: var(--button-icon-color);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .button:hover {
@@ -195,7 +199,7 @@
   height: 20px;
 }
 
-/* 复制按钮特殊样式 */
+/* 复制按钮样式 */
 .copy-btn .copied-icon {
   display: none;
 }
@@ -208,7 +212,7 @@
   display: block;
 }
 
-/* 刷新按钮特殊样式 */
+/* 刷新按钮样式 */
 .refresh-btn {
   min-width: 36px;
   width: auto;
@@ -233,6 +237,7 @@
   display: block;
 }
 
+/* 切换按钮样式 */
 .switch-container {
   display: flex;
   align-items: center;

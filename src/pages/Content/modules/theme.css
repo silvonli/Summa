@@ -36,7 +36,7 @@
   --scrollbar-radius: 3px;
 
   /* 按钮样式 */
-  --button-radius: 8px;
+  --button-radius: 6px;
   --button-hover-bg: var(--summa-primary-alpha);
   --button-icon-color: var(--summa-text-secondary);
   --button-active-color: var(--summa-primary);
