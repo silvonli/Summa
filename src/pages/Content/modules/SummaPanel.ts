@@ -4,8 +4,8 @@ import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
 import { StorageService } from '../../../services/storage';
 import htmlTemplate from './SummaPanel.html';
 import { SummaMenu } from './SummaMenu';
-import { SummaryModel } from './SummaryModel';
-import { SummaryView, ProcessStatus } from './SummaryView';
+import { SummaryModel, ProcessStatus } from './SummaryModel';
+import { SummaryView } from './SummaryView';
 
 
 class SummaPanel {
@@ -109,20 +109,13 @@ class SummaPanel {
     if (!currentModel) return;
 
     try {
-      this.view.toggleDisplayState(true);
-
-      this.view.updateProcess(ProcessStatus.EXTRACTING);
+      this.view.showProgress(ProcessStatus.EXTRACTING);
       await currentModel.extractArticle();
 
-      this.view.updateProcess(ProcessStatus.SUMMARIZING);
+      this.view.showProgress(ProcessStatus.SUMMARIZING);
       await currentModel.summarizeArticle();
 
-      this.view.updateProcess(ProcessStatus.PARSING);
-      const html = await currentModel.parseSummary();
-
-      this.view.toggleDisplayState(false);
-      this.view.updateSummary(html);
-
+      this.view.showSummary(currentModel.getSummary());
     } catch (error) {
       summaErrorLog('内容生成错误:', error);
     }
@@ -313,7 +306,6 @@ class SummaPanel {
     // 切换按钮
     const prevBtn = this.shadowRoot.querySelector('.prev-btn');
     const nextBtn = this.shadowRoot.querySelector('.next-btn');
-
     prevBtn?.addEventListener('click', () => this.onSwitch('prev'));
     nextBtn?.addEventListener('click', () => this.onSwitch('next'));
 
@@ -346,8 +338,14 @@ class SummaPanel {
     const currentModel = this.models[newIndex];
 
     if (currentModel) {
-      const html = await currentModel.parseSummary();
-      this.view?.updateSummary(html);
+      if (currentModel.isCompleted()) {
+        // 如果已完成，显示结果
+        this.view?.showSummary(currentModel.getSummary());
+      } else {
+        // 如果未完成，显示进度
+        this.view?.showProgress(currentModel.getProcess());
+      }
+
       this.updateLLMDisplay(currentModel.getLLM());
       this.updateSwitchButtons();
     }
