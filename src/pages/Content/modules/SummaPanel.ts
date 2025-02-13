@@ -9,33 +9,20 @@ import { SummaryView } from './SummaryView';
 
 
 class SummaPanel {
-  private hostNode: HTMLDivElement | null;
-  private shadowRoot: ShadowRoot | null;
-  private llmList: LLMModel[];
-  private currentUrl: string;
-  private currentLLM: LLMModel | null;
-  private isShow: boolean;
-  private menu: SummaMenu | null;
+  private hostNode: HTMLDivElement | null = null;
+  private shadowRoot: ShadowRoot | null = null;
+  private currentUrl = '';
+  private llmList: LLMModel[] = [];
+  private currentLLM: LLMModel | null = null;
+  private isShow = false;
+  private menu: SummaMenu | null = null;
 
-  private models: SummaryModel[];
-  private currentModelIndex: number;
-  private view: SummaryView | null;
+  private models: SummaryModel[] = [];
+  private currentModelIndex = -1;
+  private view: SummaryView | null = null;
 
-  private mouseEventHandler: ((event: MouseEvent) => void) | null;
+  private mouseEventHandler: ((event: MouseEvent) => void) | null = null;
 
-  constructor() {
-    this.hostNode = null;
-    this.shadowRoot = null;
-    this.currentUrl = '';
-    this.llmList = [];
-    this.currentLLM = null;
-    this.menu = null;
-    this.isShow = false;
-    this.models = [];
-    this.currentModelIndex = -1;
-    this.view = null;
-    this.mouseEventHandler = null;
-  }
 
   async init(): Promise<void> {
     // 只监听来自 background 的消息
@@ -53,27 +40,17 @@ class SummaPanel {
   // 确保当前LLM有效
   private async ensureCurrentLLM(): Promise<void> {
     const llmList = await this.getLLMList();
-
     if (llmList.length === 0) return;
 
     const savedLLM = await StorageService.getCurrentModel();
-    // 如果没有保存的LLM,使用第一个
-    if (!savedLLM) {
-      this.currentLLM = llmList[0];
-      StorageService.saveCurrentModel(this.currentLLM);
-      return;
-    }
 
-    // 检查保存的LLM是否在当前列表中
-    const llmExists = llmList.some(llm =>
-      llm.id === savedLLM.id &&
-      llm.provider === savedLLM.provider
-    );
+    // 使用空值合并运算符简化判断
+    this.currentLLM = llmList.find(llm =>
+      llm.id === savedLLM?.id &&
+      llm.provider === savedLLM?.provider
+    ) ?? llmList[0];
 
-    if (llmExists) {
-      this.currentLLM = savedLLM;
-    } else {
-      this.currentLLM = llmList[0];
+    if (this.currentLLM !== savedLLM) {
       StorageService.saveCurrentModel(this.currentLLM);
     }
   }
@@ -109,13 +86,18 @@ class SummaPanel {
     if (!currentModel) return;
 
     try {
+      const modelIndex = this.currentModelIndex;
+
       this.view.showProgress(ProcessStatus.EXTRACTING);
       await currentModel.extractArticle();
 
       this.view.showProgress(ProcessStatus.SUMMARIZING);
       await currentModel.summarizeArticle();
 
-      this.view.showSummary(currentModel.getSummary());
+      // 只有当用户仍在查看这个Model时才更新显示
+      if (this.currentModelIndex === modelIndex) {
+        this.view.showSummary(currentModel.getSummary());
+      }
     } catch (error) {
       summaErrorLog('内容生成错误:', error);
     }
@@ -147,10 +129,10 @@ class SummaPanel {
     if (isUrlChanged) {
       this.currentUrl = currentPageUrl;
       this.models = [];
-      this.updateLLMDisplay();
-      this.updateSwitchButtons();
       this.show();
       this.startNewPipeline();
+      this.updateLLMDisplay();
+      this.updateSwitchButtons();
       return;
     }
 
