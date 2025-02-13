@@ -38,13 +38,15 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  min-width: 0;
   flex: 1;
 }
 
 .header-right {
   display: flex;
   gap: var(--spacing-xs);
-  margin-left: auto;
+  margin-left: var(--spacing-xs);
+  flex-shrink: 0;
 }
 
 .content {
@@ -216,6 +218,7 @@
 .refresh-btn {
   min-width: 36px;
   width: auto;
+  max-width: 160px;
   padding-right: var(--spacing-sm);
   display: flex;
   align-items: center;
@@ -226,7 +229,10 @@
   display: none;
   font-size: 14px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--button-icon-color);
+  max-width: 120px;
 }
 
 .refresh-btn:hover .model-name {
@@ -236,7 +242,7 @@
 .switch-container {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   margin-right: var(--spacing-xs);
   font-size: 14px;
 }
@@ -274,7 +280,7 @@
   align-items: center;
   gap: 2px;
   color: var(--summa-text-secondary);
-  min-width: 40px;
+  min-width: 32px;
   justify-content: center;
 }
 
