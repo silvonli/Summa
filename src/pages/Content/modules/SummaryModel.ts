@@ -1,17 +1,23 @@
 import { summaDebugLog, summaErrorLog } from '../../../lib/utils';
 import { marked } from 'marked';
 import { LLMModel } from '../../../services/LLM/provider';
-import { SummaryState } from './types';
+
+export interface SummaryState {
+  llm: LLMModel | null;
+  url: string;
+  article: string;
+  summary: string;
+}
 
 export class SummaryModel {
   private state: SummaryState;
 
-  constructor(model: LLMModel | null, currentUrl: string) {
+  constructor(llm: LLMModel | null, currentUrl: string) {
     this.state = {
       article: '',
       summary: '',
-      model,
-      currentUrl
+      llm: llm,
+      url: currentUrl
     };
   }
 
@@ -23,7 +29,7 @@ export class SummaryModel {
         action: 'extractArticle',
         data: {
           html: docHtml,
-          url: this.state.currentUrl
+          url: this.state.url
         }
       });
 
@@ -39,7 +45,7 @@ export class SummaryModel {
   }
 
   async summarizeArticle(): Promise<void> {
-    if (!this.state.model) {
+    if (!this.state.llm) {
       this.state.summary = '### 错误\n\n模型未配置';
       return;
     }
@@ -53,9 +59,9 @@ export class SummaryModel {
       const response = await chrome.runtime.sendMessage({
         action: 'summarize',
         data: {
-          model: this.state.model,
+          model: this.state.llm,
           content: this.state.article,
-          url: this.state.currentUrl
+          url: this.state.url
         }
       });
 
@@ -86,5 +92,9 @@ export class SummaryModel {
 
   getSummary(): string {
     return this.state.summary;
+  }
+
+  getLLM(): LLMModel | null {
+    return this.state.llm;
   }
 } 

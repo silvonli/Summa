@@ -11,8 +11,8 @@ import { SummaryView, ProcessStatus } from './SummaryView';
 class SummaPanel {
   private hostNode: HTMLDivElement | null;
   private shadowRoot: ShadowRoot | null;
-  private currentUrl: string;
   private llmList: LLMModel[];
+  private currentUrl: string;
   private currentLLM: LLMModel | null;
   private isShow: boolean;
   private menu: SummaMenu | null;
@@ -90,11 +90,11 @@ class SummaPanel {
     }
   }
 
-  // 渲染总结内容
-  private async renderSummaryContent(): Promise<void> {
+  // 开始新的 pipeline
+  private async startNewPipeline(): Promise<void> {
     if (!this.shadowRoot) return;
 
-    // 创建新的实例
+    // 创建新Model实例
     const newModel = new SummaryModel(this.currentLLM, this.currentUrl);
     this.models.push(newModel);
     this.currentModelIndex = this.models.length - 1;
@@ -136,9 +136,10 @@ class SummaPanel {
     // 首次初始化场景
     if (!this.hostNode) {
       this.currentUrl = currentPageUrl;
+      await this.ensureCurrentLLM();
       await this.inject();
       this.show();
-      this.renderSummaryContent();
+      this.startNewPipeline();
       return;
     }
 
@@ -152,8 +153,11 @@ class SummaPanel {
     const isUrlChanged = this.currentUrl !== currentPageUrl;
     if (isUrlChanged) {
       this.currentUrl = currentPageUrl;
+      this.models = [];
+      this.updateLLMDisplay();
+      this.updateSwitchButtons();
       this.show();
-      this.renderSummaryContent();
+      this.startNewPipeline();
       return;
     }
 
@@ -184,9 +188,10 @@ class SummaPanel {
 
       this.bindEvents();
       this.initializeIcons();
-      await this.ensureCurrentLLM();
-      this.initLLMNameDisplay();
       this.initSummaryView();
+
+      this.updateLLMDisplay();
+      this.updateSwitchButtons();
     } catch (error) {
       summaErrorLog('注入失败:', error);
     }
@@ -231,12 +236,46 @@ class SummaPanel {
     });
   }
 
-  private initLLMNameDisplay(): void {
+  // 更新切换按钮的可见性和状态
+  private updateSwitchButtons(): void {
+    if (!this.shadowRoot) return;
+
+    const switchContainer = this.shadowRoot.querySelector('.switch-container');
+    if (!switchContainer) return;
+
+    // 只有一个模型时隐藏切换按钮
+    if (this.models.length <= 1) {
+      switchContainer.classList.add('hidden');
+      return;
+    }
+
+    switchContainer.classList.remove('hidden');
+    const currentCount = this.shadowRoot.querySelector('.current-count');
+    const totalCount = this.shadowRoot.querySelector('.total-count');
+
+    if (currentCount && totalCount) {
+      currentCount.textContent = `${this.currentModelIndex + 1}`;
+      totalCount.textContent = `${this.models.length}`;
+    }
+
+    // 更新按钮状态
+    const prevBtn = this.shadowRoot.querySelector('.prev-btn');
+    const nextBtn = this.shadowRoot.querySelector('.next-btn');
+
+    if (prevBtn) {
+      prevBtn.classList.toggle('disabled', this.currentModelIndex <= 0);
+    }
+    if (nextBtn) {
+      nextBtn.classList.toggle('disabled', this.currentModelIndex >= this.models.length - 1);
+    }
+  }
+
+  private updateLLMDisplay(llm: LLMModel | null = this.currentLLM): void {
     if (!this.shadowRoot) return;
 
     const nameSpan = this.shadowRoot.querySelector<HTMLSpanElement>('.refresh-btn .model-name');
     if (nameSpan) {
-      nameSpan.textContent = this.currentLLM?.name ?? '未选择大语言模型';
+      nameSpan.textContent = llm?.name ?? '未选择大语言模型';
     }
   }
 
@@ -271,6 +310,13 @@ class SummaPanel {
   private bindEvents(): void {
     if (!this.shadowRoot) return;
 
+    // 切换按钮
+    const prevBtn = this.shadowRoot.querySelector('.prev-btn');
+    const nextBtn = this.shadowRoot.querySelector('.next-btn');
+
+    prevBtn?.addEventListener('click', () => this.onSwitch('prev'));
+    nextBtn?.addEventListener('click', () => this.onSwitch('next'));
+
     // 复制按钮
     const copyBtn = this.shadowRoot.querySelector('.copy-btn');
     copyBtn?.addEventListener('click', () => this.onCopy());
@@ -286,6 +332,25 @@ class SummaPanel {
     // 设置按钮
     const settingsBtn = this.shadowRoot.querySelector('.settings-btn');
     settingsBtn?.addEventListener('click', () => this.onSettings());
+  }
+
+  // prev/next 按钮方法
+  private async onSwitch(direction: 'prev' | 'next'): Promise<void> {
+    const newIndex = direction === 'prev'
+      ? this.currentModelIndex - 1
+      : this.currentModelIndex + 1;
+
+    if (newIndex < 0 || newIndex >= this.models.length) return;
+
+    this.currentModelIndex = newIndex;
+    const currentModel = this.models[newIndex];
+
+    if (currentModel) {
+      const html = await currentModel.parseSummary();
+      this.view?.updateSummary(html);
+      this.updateLLMDisplay(currentModel.getLLM());
+      this.updateSwitchButtons();
+    }
   }
 
   // 复制按钮方法
@@ -338,8 +403,9 @@ class SummaPanel {
   private onLLMSelect(llm: LLMModel) {
     this.currentLLM = llm;
     StorageService.saveCurrentModel(llm);
-    this.initLLMNameDisplay();
-    this.renderSummaryContent();
+    this.startNewPipeline();
+    this.updateLLMDisplay(llm);
+    this.updateSwitchButtons();
   }
 
   // 关闭按钮方法
@@ -366,19 +432,6 @@ class SummaPanel {
 
     if (!isClickInside) {
       this.hide();
-    }
-  }
-
-  // 切换到指定索引的 Model
-  private async switchToModel(index: number): Promise<void> {
-    if (index < 0 || index >= this.models.length || !this.view) return;
-
-    this.currentModelIndex = index;
-    const currentModel = this.models[index];
-
-    if (currentModel) {
-      const html = await currentModel.parseSummary();
-      this.view.updateSummary(html);
     }
   }
 

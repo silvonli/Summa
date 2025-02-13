@@ -1,6 +1,20 @@
 <div id="summa" class="panel">
   <div class="header">
-    <div class="left-actions">
+    <!-- 左侧操作区 -->
+    <div class="header-left">
+      <div class="switch-container hidden">
+        <button class="prev-btn" aria-label="上一个">
+          <span>＜</span>
+        </button>
+        <div class="count">
+          <span class="current-count">1</span>
+          <span class="separator">/</span>
+          <span class="total-count">2</span>
+        </div>
+        <button class="next-btn" aria-label="下一个">
+          <span>＞</span>
+        </button>
+      </div>
       <button class="button copy-btn" aria-label="复制总结">
         <span class="icon-container" data-icon="copy,copied"></span>
       </button>
@@ -9,7 +23,8 @@
         <span class="model-name"></span>
       </button>
     </div>
-    <div class="right-actions">
+    <!-- 右侧操作区 -->
+    <div class="header-right">
       <button class="button settings-btn" aria-label="设置">
         <span class="icon-container" data-icon="settings"></span>
       </button>
@@ -19,6 +34,6 @@
     </div>
   </div>
   <div class="content">
-    <!-- 由 SummaryRenderer 动态创建 -->
+    <!-- 动态创建 -->
   </div>
 </div>
