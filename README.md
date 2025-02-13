@@ -29,7 +29,7 @@ Summa 是一款 Chrome 扩展，利用 AI 对网页内容进行总结。无论�
 - **格式转换:** 使用 Turndown 将 HTML 内容转换为 Markdown 格式，方便 LLM 处理。
 - **摘要渲染:** 使用 marked 和 github-markdown-css 渲染生成的摘要。
 - **前端开发:** 使用 Shadow DOM、TypeScript 和 CSS 实现总结面板，使用 React 和 Shadcn 实现配置页。
-- **LLM 接入:** 通过 Vercel AI SDK 接入 OpenAI、Anthropic、OpenRouter、LMStudio、Ollama 等多个 LLM 服务商。
+- **LLM 接入:** 通过 Vercel AI SDK 接入 OpenAI、Anthropic、OpenRouter、LMStudio、Ollama 等 LLM 服务商。
 
 
 ### 许可证
