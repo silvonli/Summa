@@ -17,6 +17,7 @@
   --progress-text-pending: var(--summa-text-secondary);
 
   /* Spacing - 优化间距 */
+  --spacing-xxs: 4px;
   --spacing-xs: 8px;
   --spacing-sm: 12px;
   --spacing-md: 16px;

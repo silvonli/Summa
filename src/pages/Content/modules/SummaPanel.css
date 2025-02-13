@@ -37,14 +37,14 @@
 .header-left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   min-width: 0;
   flex: 1;
 }
 
 .header-right {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-xxs);
   margin-left: var(--spacing-xs);
   flex-shrink: 0;
 }
@@ -159,12 +159,6 @@
   transition: opacity 0.3s ease;
 }
 
-.left-actions,
-.right-actions {
-  display: flex;
-  gap: var(--spacing-xs);
-}
-
 
 .button {
   display: flex;
@@ -263,6 +257,7 @@
   cursor: pointer;
   color: var(--summa-text-secondary);
   transition: all 0.2s ease;
+  padding: 2px;
 }
 
 .switch-container button:hover:not(.disabled) {
@@ -286,4 +281,17 @@
 
 .switch-container .separator {
   color: var(--summa-text-tertiary);
+}
+
+.switch-container button .icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.switch-container button .icon-container svg {
+  width: 16px;
+  height: 16px;
 }
