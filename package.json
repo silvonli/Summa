@@ -1,6 +1,6 @@
 {
   "name": "summa",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "提取页面内容并使用 AI 进行总结",
   "license": "MIT",
   "repository": {

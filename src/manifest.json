@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Summa",
   "description": "使用 AI 总结页面内容，让阅读更高效",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "permissions": [
     "activeTab",
     "storage",
