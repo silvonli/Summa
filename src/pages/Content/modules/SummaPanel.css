@@ -175,7 +175,6 @@
   border-radius: var(--button-radius);
   color: var(--button-icon-color);
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .button:hover {
@@ -216,11 +215,15 @@
 .refresh-btn {
   min-width: 36px;
   width: auto;
-  max-width: 160px;
   padding-right: var(--spacing-sm);
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  overflow: hidden;
+}
+
+.refresh-btn:hover {
+  flex-grow: 1;
 }
 
 .refresh-btn .model-name {
@@ -230,7 +233,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--button-icon-color);
-  max-width: 120px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  /* flex-basis: content; */
+  min-width: 0;
+  text-align: left;
 }
 
 .refresh-btn:hover .model-name {
